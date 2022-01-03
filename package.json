@@ -1,0 +1,67 @@
+{
+  "name": "@stitch/root",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Stitch - a Wholesale Digital created drop-in UI framework for Web apps.",
+  "main": "index.js",
+  "engines": {
+    "node": ">=12.0.0",
+    "yarn": "^1.0.0"
+  },
+  "scripts": {
+    "postinstall": "husky install",
+    "install:fix": "yarn install --ignore-scripts && npm rebuild core-js && npm run postinstall",
+    "lint": "yarn workspaces run lint",
+    "lint:stage": "eslint --fix",
+    "publish:core": "node ./scripts/publish.js --package=core",
+    "publish:less-helper": "node ./scripts/publish.js --package=less-helper --lint=false --test=false --build=false",
+    "publish:less-plugin-functions": "node ./scripts/publish.js --package=less-plugin-functions --lint=false --test=false --build=false",
+    "publish:less-plugin-relative-em": "node ./scripts/publish.js --package=less-plugin-relative-em",
+    "publish:react": "node ./scripts/publish.js --package=react",
+    "publish:types": "node ./scripts/publish.js --package=types",
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://alm-github.systems.uk.hsbc/Net-UI/stitch.git"
+  },
+  "keywords": [
+    "stitch",
+    "micro front-end"
+  ],
+  "author": "HSBC",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "lint-staged": {
+    "packages/*/src/**/*.{js,jsx,ts}": [
+      "npm run lint:stage",
+      "jest --watchAll=false -o --findRelatedTests"
+    ]
+  },
+  "dependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "^7.16.3",
+    "@babel/plugin-proposal-export-default-from": "^7.16.0",
+    "@babel/plugin-transform-runtime": "^7.16.4",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/runtime": "^7.16.3",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@rollup/plugin-typescript": "^8.3.0",
+    "core-js": "^3.19.1",
+    "husky": "^7.0.4",
+    "jest": "^27.3.1",
+    "lint-staged": "^12.1.2",
+    "lodash": "^4.17.21",
+    "rollup": "^2.60.1",
+    "rollup-plugin-cleanup": "^3.2.1",
+    "standard": "^16.0.4",
+    "ts-standard": "10.0.0",
+    "typescript": "<4.5.0",
+    "webpack": "^5.64.4"
+  }
+}

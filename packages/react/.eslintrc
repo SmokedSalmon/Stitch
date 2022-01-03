@@ -1,0 +1,14 @@
+{
+  "extends": [
+    "standard",
+    "standard-jsx"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "babelOptions": {
+      "rootMode": "root"
+    }
+  }
+}

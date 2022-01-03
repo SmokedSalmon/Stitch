@@ -1,0 +1,37 @@
+{
+  "$id": "schemas/host.json",
+  "type": "object",
+  "properties": {
+    "hostName": {
+      "description": "Web host name",
+      "type": "string"
+    },
+    "protocol": {
+      "description": "http or https, default to https",
+      "type": "string",
+      "enum": ["http", "https"],
+      "default": "https"
+    },
+    "server": {
+      "description": "Web host server FQDN or IP address",
+      "type": "string",
+      "oneOf": [
+        { "format": "hostname" },
+        { "format": "ipv4" },
+        { "format": "ipv6" }
+      ]
+    },
+    "port": {
+      "description": "Port number",
+      "type": "number",
+      "maximum": 65535
+    },
+    "publicPath": {
+      "description": "Public path, default to root '/'",
+      "type": "string",
+      "pattern": "^(?:\\\/[^\\s]*)?$",
+      "default": "/"
+    }
+  },
+  "required": ["hostName", "protocol", "server", "publicPath"]
+}

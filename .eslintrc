@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "standard"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "babelOptions": {
+      "rootMode": "upward"
+    }
+  }
+}

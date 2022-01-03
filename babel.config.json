@@ -1,0 +1,18 @@
+{
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": {
+          "version": "3.9.1",
+          "proposals": true
+        }
+      }
+    ]
+  ],
+  "plugins": [
+    "@babel/transform-runtime",
+    "@babel/proposal-export-default-from"
+  ]
+}

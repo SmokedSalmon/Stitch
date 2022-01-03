@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "declaration": true,
+    "declarationDir": ".",
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["ESNext", "dom"],
+    "allowJs": false,
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "newLine": "LF"
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}

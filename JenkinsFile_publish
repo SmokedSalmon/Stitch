@@ -1,0 +1,112 @@
+node("cm-linux") {
+  try {
+    environment {
+      packageName=params.packageName
+    }
+    stage('Setup NodeJs') {
+      def nodejsHome = tool 'NodeJS_14_15_4_Linux'
+      env.NODE_HOME = "${nodejsHome}"
+      env.PATH = "${nodejsHome}/bin:${env.PATH}"
+
+      def gitHome = tool "GIT_Latest_Linux"
+      sh("echo GIT: ${gitHome}")
+      gitHome = gitHome.substring(0, gitHome.lastIndexOf("/"))
+      env.PATH = "${gitHome}:${env.PATH}"
+
+      sh 'which node'
+      sh 'node -v'
+      sh 'npm -v'
+    }
+    stage('Checkout') {
+      checkout scm
+    }
+    // Install
+    stage('Install') {
+      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "HSBCNET-G3-DEV-GITHUB-OAUTH", passwordVariable: 'USERPASS', usernameVariable: 'USERNAME']]) {
+      sh '''
+        echo homePath: ${HOME};
+        echo workspace: ${WORKSPACE};
+        HOME=${WORKSPACE};
+        echo newHomePath: ${HOME};
+        echo yarn binary path: ${WORKSPACE}/node_modules/yarn/bin;
+        echo package NAME: ${packageName};
+        echo package path: ${WORKSPACE}/packages/${packageName};
+
+        NPM_CONFIG_ALWAYS_AUTH=true;
+        NPM_CONFIG_REGISTRY="https://dsnexus.uk.hibm.hsbc:8081/nexus/content/groups/npm-all/";
+        NPM_CONFIG_STRICT_SSL=false;
+        npm config set prefix $WORKSPACE;
+        npm config list;
+
+        npm install yarn;
+        ${WORKSPACE}/node_modules/yarn/bin/yarn --version;
+        ${WORKSPACE}/node_modules/yarn/bin/yarn config list;
+        ${WORKSPACE}/node_modules/yarn/bin/yarn install
+      '''
+      }
+    }
+
+    // Linting
+    stage('Lint') {
+      if (params.run_lint == true) {
+        sh '''
+          cd ${WORKSPACE}/packages/${packageName}
+          ${WORKSPACE}/node_modules/yarn/bin/yarn lint
+        '''
+      } else {
+        sh "echo Lint step is skipped"
+      }
+    }
+
+    // Unit test
+    stage('Unit Test') {
+      if (params.run_test == true) {
+        sh '''
+          echo Skipped Unit test unit they are ready
+          #cd ${WORKSPACE}/packages/${packageName}
+          #${WORKSPACE}/node_modules/yarn/bin/yarn test --passWithNoTests
+        '''
+      } else {
+        sh "echo Unit Test step is skipped"
+      }
+    }
+
+    // Build
+    stage('Build') {
+      if (params.run_build == true) {
+        sh '''
+          cd ${WORKSPACE}/packages/${packageName}
+          ${WORKSPACE}/node_modules/yarn/bin/yarn build
+        '''
+      } else {
+         sh "echo Build step is skipped"
+       }
+    }
+
+    // Publish to HSBC internal registries
+    stage('Publish to Nexus Registries') {
+      sh "npm run publish:${packageName}"
+      currentBuild.result = 'SUCCESS'
+    }
+
+    // Mail
+    stage('Mail') {
+      def result = sh (
+        script: '''
+          cat << EOF
+@stitch/${packageName} deployment to nexus registries has finished, please view result at:
+${BUILD_URL}console
+Health check on testing environment is advised.
+        ''',
+        returnStdout: true
+      ).trim()
+      mail to:"wiky.w.c.he@hsbc.com.hk,sanvyyllin@hsbc.com.cn,paul.n.pei@hsbc.com.cn,jerry.j.su@hsbc.com.cn,nick.w.y.zeng@hsbc.com.cn,seth.x.y.yang@hsbc.com.cn,devin.d.h.luo@noexternalmail.hsbc.com,jiawei.li_sp@noexternalmail.hsbc.com,shawn.s.pang@noexternalmail.hsbc.com",
+      subject:"@stitch/${packageName} deployment job finished",
+      body:result
+    }
+  }
+  catch (err) {
+    currentBuild.result = 'FAILURE'
+    echo err
+  }
+}

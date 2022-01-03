@@ -1,0 +1,40 @@
+{
+  "name": "@stitch/react",
+  "version": "1.0.0-alpha.5",
+  "description": "Stich React adaptor",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
+    "lint": "eslint \"src/**/*.{js,jsx}\"",
+    "test": "jest"
+  },
+  "repository": "https://alm-github.systems.uk.hsbc/Net-UI/stitch.git",
+  "keywords": [
+    "stitch",
+    "micro front-end",
+    "react"
+  ],
+  "author": "HSBC",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "16.x || 17.x",
+    "react-dom": "16.x || 17.x"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.16.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "dependencies": {
+    "@babel/runtime": "7.x",
+    "@stitch/core": "^1.0.0-alpha.6",
+    "core-js": "^3.9.1",
+    "lodash": "4.x"
+  },
+  "sideEffects": false
+}

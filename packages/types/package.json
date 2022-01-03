@@ -1,0 +1,33 @@
+{
+  "name": "@stitch/types",
+  "version": "1.0.0-alpha.0",
+  "description": "Stitch types",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
+    "build:dev": "rollup -c -m -w",
+    "lint": "ts-standard \"src/**/*.ts\"",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://alm-github.systems.uk.hsbc/Net-UI/stitch.git"
+  },
+  "keywords": [
+    "stitch",
+    "micro front-end",
+    "typescript"
+  ],
+  "author": "HSBC",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/runtime": "7.x",
+    "core-js": "^3.9.1"
+  },
+  "sideEffects": false
+}

@@ -1,0 +1,28 @@
+{
+  "$id": "schemas/libService.json",
+  "type": "object",
+  "properties": {
+    "serviceName": { "type": "string" },
+    "autoLoad": {
+      "description": "Whether this service is loaded automatically when Stitch start. Only for Lib Service. Default is true, set false to get startup performance gain.",
+      "type": "boolean",
+      "default": true
+    },
+    "disabled": {
+      "description": "A disabled service will not be initialized and loaded into Service Manager. Default is false",
+      "type": "boolean",
+      "default": false
+    },
+    "protected": {
+      "description": "The service is not allowed to remove, update if protected is True. Default is false",
+      "type": "boolean",
+      "default": false
+    },
+    "options": {
+      "description": "Service options",
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "required": ["serviceName", "autoLoad", "disabled", "protected"]
+}

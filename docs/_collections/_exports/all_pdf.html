@@ -1,0 +1,31 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stitch | Documentation - PDF</title>
+  <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+</head>
+<body class="print">
+  {% for page in site.pages %}
+    {% if page.dir contains '/assets/' %}
+      {% continue %}
+    {% endif %}
+    {% assign should_exclude = false %}
+    {% for file_to_exclude in site.sidebar_excludes %}
+      {% if page.name == file_to_exclude %}
+        {% assign should_exclude = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    {% if should_exclude %}
+      {% continue %}
+    {% endif %}
+    <div class="page-content">
+      {{ page.content | markdownify }}
+    </div>
+    <div class="page-break"></div>
+  {% endfor %}
+</body>
+</html>

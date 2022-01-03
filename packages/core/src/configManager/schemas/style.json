@@ -1,0 +1,28 @@
+{
+  "$id": "schemas/style.json",
+  "type": "object",
+  "properties": {
+    "styleName": {
+      "description": "Name of the style resource definition",
+      "type": "string"
+    },
+    "hostName": {
+      "description": "Host name registered in hosts array, if not specified, resource URL should be full path",
+      "type": "string"
+    },
+    "resource": {
+      "description": "CSS file resource relative to public path. If full path resource is given, hostName will be override",
+      "type": "string",
+      "oneOf": [
+        { "pattern": "^(?:\\\/[^\\s]*)?$" },
+        { "format": "uri" }
+      ]
+    },
+    "autoLoad": {
+      "description": "Whether CSS file will be added to HTML automatically, default is true. If set to false, MFEApp could also register CSS via StyleService manually.",
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "requried": ["styleName", "resource", "autoLoad"]
+}

@@ -1,0 +1,44 @@
+{
+  "$id": "schemas/lib.json",
+  "type": "object",
+  "properties": {
+    "libName": {
+      "description": "Unique lib name exposed in WebPack5 module federation",
+      "type": "string"
+    },
+    "hostName": {
+      "description": "Host name registered in hosts array, if not specified, resource URL should be full path",
+      "type": "string"
+    },
+    "resource": {
+      "description": "MFE Application package resource relative to public path. If full path resource is given, hostName will be override",
+      "type": "string",
+      "oneOf": [
+        { "pattern": "^(?:\\\/[^\\s]*)?$" },
+        { "format": "uri" }
+      ]
+    },
+    "styles": {
+      "description": "An array of style sheets that can be added to HTML automatically",
+      "type": "array",
+      "items": { "$ref": "style.json" }
+    },
+    "apps": {
+      "description": "List of MFE Applications contained in this library/module",
+      "type": "array",
+      "items": { "$ref": "app.json" }
+    },
+    "services": {
+      "type": "array",
+      "oneOf": [
+        {
+          "items": { "$ref": "libService.json" }
+        },
+        {
+          "type": "undefined"
+        }
+      ]
+    }
+  },
+  "required": ["libName", "resource"]
+}

@@ -1,0 +1,28 @@
+---
+---
+$font_main: #727272;
+$secondary_color: #4BA6A9;
+$secondary_color_light: lightblue;
+$secondary_color_lighter: #ebffff;
+
+body {
+  a {
+    color: $font_main;
+    &:hover {
+      color: $secondary_color;
+    }
+  }
+}
+
+#site-toc {
+  .active {
+    > .sidebar-entry {
+      background-color: $secondary_color_lighter;
+      border-left: 2px solid $secondary_color_light;
+      [dir="rtl"] & {
+        border-left: 0;
+        border-right: 2px solid $secondary_color_light;
+      }
+    }
+  }
+}

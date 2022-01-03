@@ -1,0 +1,8 @@
+@plugin "@stitch/less-plugin-functions";
+@plugin "@stitch/less-plugin-relative-em";
+
+.function {
+  .rem(@value, @parent-font-size: null) {
+    return: relativeEm(@value, @base-font-size, @parent-font-size);
+  }
+}

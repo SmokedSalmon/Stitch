@@ -1,0 +1,218 @@
+<data id="toc-data" style="display: none">
+  {% for page in site.pages %}
+    {% comment %}
+    <!-- We want only the Document files -->
+    {% endcomment %}
+      {% if page.dir contains '/assets/' %}
+        {% continue %}
+      {% endif %}
+      {% assign should_exclude = false %}
+      {% for file_to_exclude in site.sidebar_excludes %}
+        {% if page.name == file_to_exclude %}
+          {% assign should_exclude = true %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+      {% if should_exclude %}
+        {% continue %}
+      {% endif %}
+    <entry data='"name":"{{page.name}}","dir":"{{page.dir}}","url":"{{page.url}}","relative_url":"{{page.url|relative_url}}","title":"{{page.title}}"'></entry>
+  {% endfor %}
+</data>
+
+<script type="text/javascript">
+  (function () {
+    const MAX_DIR_DEPTH = 4;
+    const current_url = '{{ page.url }}';
+
+    // Parse the Jekyll's page data into javascript object
+    const toc_data = new Array(...document.getElementById('toc-data').children)
+      .map(el => `{${el.getAttribute('data')}}`)
+      .map(page_string => {
+        try {
+          return JSON.parse(page_string);
+        } catch (err) {
+          return null;
+        }
+      })
+      .filter(page => !!page);
+
+    // object to reflect the documents folder structure
+    /** @typedef {Object} NavEntryData
+     *  @property {string} name
+     *  @property {string} dir
+     *  @property {string} url - relative path from doc root
+     *  @property {string} relative_url - relative path from the github host
+     *  @property {string} title
+     */
+    /** @typedef {Object} NavStruct
+     *  @property {NavEntryData} data
+     *  @property {NavStruct[]} children
+     */
+
+    /** @type NavStruct[] */
+    const toc_structure = [];
+
+    // find the dir in the existing toc structure, return false if not found
+    function findDirInStruct(dir) {
+      const dir_parts = dir.split('/').filter(segment => !!segment);  // filter those has nothing, such as the first and the last
+      // root
+      const root = { children: toc_structure };
+      if (dir_parts.length < 1) return root;
+      // sub folders
+      let i = 0, iterator = root;
+      while (i < Math.min(dir_parts.length, MAX_DIR_DEPTH)) {
+        try {
+          iterator = iterator.children.find(item => item.data.name === dir_parts[i]);
+          i++;
+        } catch (err) {
+          return false;
+        }
+      }
+      return iterator;
+    }
+
+    // create a dir entry in the toc_structure
+    function createDirInStruct(dir) {
+      const dir_parts = dir.split('/').filter(segment => !!segment);  // filter those has nothing, such as the first and the last
+      let iterator = { children: toc_structure };
+      let acc_dir = '/';
+      dir_parts.forEach(dir_segment => {
+        acc_dir = `${acc_dir}${dir_segment}/`;
+        let found = iterator.children.find(item => item.data.name === dir_segment);
+        if (!found) {
+          const new_dir = { data: { name: dir_segment, dir: acc_dir }, children: [] };
+          iterator.children.push(new_dir);
+          iterator = new_dir;
+        } else {
+          iterator = found;
+        }
+      });
+      return iterator
+    }
+
+    let depth = 0;
+    // render the nested <ul> list from toc_structure, with depth limit
+    function renderDirAsUL(dir_struct, current_url) {
+      if (!dir_struct || !Array.isArray(dir_struct.children) || !dir_struct.children.length) return null;
+      if (depth >= MAX_DIR_DEPTH) return null;
+      const ul_dom = document.createElement('ul');
+      dir_struct.children.forEach(item => {
+        const { data, children } = item;
+        const title_label = decodeURIComponent(data.title || data.name.replace(/^(\d?\.)*/, ''));
+        // title with chapter prefix extracted from file name
+        let title_with_chapter_label = decodeURIComponent(typeof data.name === 'string' ? data.name : data.name);
+        const li_dom = document.createElement('li');
+        if (data.url === current_url) li_dom.classList.add('active');
+        ul_dom.appendChild(li_dom);
+        let title_dom, title_with_chapter_dom;
+        if (children) {
+          // item is a sub-folder, enter and recursive
+          if (current_url && current_url.includes(data.dir)) li_dom.classList.add('expended');
+          else li_dom.classList.add('collapsed');
+
+          const toggleSubFolder = () => {
+            if (li_dom.classList.contains('expended')) {
+              li_dom.classList.remove('expended');
+              li_dom.classList.add('collapsed');
+            } else {
+              li_dom.classList.add('expended');
+              li_dom.classList.remove('collapsed');
+            }
+          };
+
+          li_dom.classList.add('dir');
+          if (data.relative_url) {
+            // item is a sub-folder with index page
+            title_dom = document.createElement('a');
+            title_with_chapter_dom = document.createElement('a');
+            title_dom.setAttribute('href', data.relative_url);
+            title_with_chapter_dom.setAttribute('href', data.relative_url);
+          } else {
+            // item is a sub-folder without index page
+            title_dom = document.createElement('label');
+            title_with_chapter_dom = document.createElement('label');
+          }
+          title_dom.innerText = title_label;
+          title_with_chapter_dom.innerText = title_with_chapter_label;
+          const arrow_dom = document.createElement('span');
+          arrow_dom.innerText = '>';
+          arrow_dom.classList.add('handle');
+          title_dom.appendChild(arrow_dom);
+          title_with_chapter_dom.appendChild(arrow_dom.cloneNode(true));
+          li_dom.appendChild(title_dom);
+          li_dom.appendChild(title_with_chapter_dom);
+          const sub_ul_dom = renderDirAsUL(item, current_url);
+          li_dom.appendChild(sub_ul_dom);
+          arrow_dom.addEventListener('click', (e) => {
+            toggleSubFolder();
+            e.preventDefault();
+            e.stopPropagation();
+          });
+          const linkClickHandler = (e) => {
+            if ((e.target && e.target.href) === window.location.href) e.preventDefault();
+            toggleSubFolder();
+          };
+          title_dom.addEventListener('click', linkClickHandler);
+          title_with_chapter_dom.addEventListener('click', linkClickHandler);
+        } else {
+          // item is an article link
+          // const indent_dom = document.createElement('span');
+          title_with_chapter_label = title_with_chapter_label.replace(/\.[^.]*$/, ''); // remove file ext
+          title_dom = document.createElement('a');
+          title_dom.setAttribute('href', data.relative_url);
+          title_dom.innerText = title_label;
+          title_with_chapter_dom = document.createElement('a');
+          title_with_chapter_dom.setAttribute('href', data.relative_url);
+          title_with_chapter_dom.innerText = title_with_chapter_label;
+          li_dom.appendChild(title_dom);
+          li_dom.appendChild(title_with_chapter_dom);
+        }
+        title_dom.classList.add('sidebar-entry', 'title');
+        title_with_chapter_dom.classList.add('sidebar-entry', 'raw-file-name');
+        // default show title instead of raw file name
+        title_with_chapter_dom.style.setProperty('display', 'none', 'important');
+      });
+      return ul_dom;
+    }
+
+    // ** main ** //
+    toc_data.forEach((pageData) => {
+      const { name, dir, url, relative_url, title } = pageData;
+
+      // check if dir in the toc_structure exists
+      let dir_node = findDirInStruct(dir) || createDirInStruct(dir);
+
+
+      const filename = typeof name === 'string' && name.replace(/\.[^.]*$/, '');
+      const isIndexPage = filename.indexOf('index') > -1;
+      if (isIndexPage) {
+        // There is an index page of the directory, make the label both label/show/hide handler and also a link
+        dir_node.data = { ...dir_node.data, url, relative_url, dir }
+      } else {
+        // other sub pages under the directory
+        dir_node.children.push({ data: { name, title, url, relative_url, dir } })
+      }
+    });
+
+    // Generate the DOM structure
+    const ul_dom = renderDirAsUL({ children: toc_structure }, current_url);
+
+    try {
+      document.querySelector('#site-toc').appendChild(ul_dom);
+    } catch (err) { /* silently ignore the error */ }
+
+    // TODO put this toggle chapter prefix method on a button toggle
+    window.switchChapterPrefix = function () {
+      const titleDisplay = getComputedStyle(document.querySelector('.sidebar-entry.title')).display;
+      const rawFileNameDisplay = getComputedStyle(document.querySelector('.sidebar-entry.raw-file-name')).display;
+      const isTitleOnly = titleDisplay.indexOf('none') < 0;
+      const rawFileNameDisplayToChange = isTitleOnly ? titleDisplay : 'none';
+      const titleDisplayToChange = isTitleOnly ? 'none' : rawFileNameDisplay;
+      document.querySelectorAll('.sidebar-entry.title')
+        .forEach(el => el.style.setProperty('display', titleDisplayToChange, 'important'));
+      document.querySelectorAll('.sidebar-entry.raw-file-name')
+        .forEach(el => el.style.setProperty('display', rawFileNameDisplayToChange, 'important'));
+    };
+  }());
+</script>

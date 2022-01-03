@@ -1,0 +1,19 @@
+title: Stitch Documentation
+
+# Enable Jekyll emoji plugin, so that you could write emoji same way you do on Github
+plugins:
+  - jemoji
+
+theme: jekyll-theme-minimal
+
+collections_dir: ./_collections
+collections:
+  exports:
+    output: true
+
+# Some constants
+sidebar_excludes:
+  - README.md
+  - about.md
+  - examples.md
+  - markdown_page_example.md

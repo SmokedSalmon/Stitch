@@ -1,0 +1,13 @@
+dist/
+
+# unit test related
+*.config.*
+coverage
+jest_coverage
+__tests__
+__mocks__
+*.spec.*
+*.test.*
+*.snap
+
+rollup-plugin-dynamic-require-vars.js

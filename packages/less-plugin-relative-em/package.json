@@ -1,0 +1,35 @@
+{
+  "name": "@stitch/less-plugin-relative-em",
+  "version": "1.0.0-alpha.2",
+  "description": "Calculate the em value based on relative base font less variable",
+  "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
+    "lint": "eslint \"src/**/*.js\"",
+    "test": "echo \"Error: no test specified\" && exit 0;",
+    "test:dev": "babel-node test/plugin-relative-em.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://alm-github.systems.uk.hsbc/Net-UI/stitch.git"
+  },
+  "keywords": [
+    "stitch",
+    "micro front-end",
+    "less",
+    "less plugin",
+    "rem"
+  ],
+  "author": "HSBC",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/node": "^7.16.0",
+    "@less/test-data": "^4.1.0",
+    "diff": "^3.2.0",
+    "less": "^4.1.2"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "@stitch/user-profile-service",
+  "version": "1.0.0-alpha.0",
+  "description": "Stitch UserProfileService",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "rollup -c",
+    "build:dev": "rollup -c -m -w",
+    "lint": "eslint \"src/**/*.js\"",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://alm-github.systems.uk.hsbc/Net-UI/stitch.git"
+  },
+  "keywords": [
+    "stitch",
+    "micro front-end",
+    "common service",
+    "user profile"
+  ],
+  "author": "HSBC",
+  "license": "MIT",
+  "peerDependencies": {
+    "@stitch/core": "^1.0.0-alpha.8"
+  },
+  "dependencies": {
+    "@babel/runtime": "7.x",
+    "@stitch/types": "^1.0.0-alpha.0",
+    "core-js": "^3.9.1",
+    "lodash": "4.x"
+  },
+  "sideEffects": false
+}

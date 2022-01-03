@@ -1,0 +1,197 @@
+---
+---
+@import "jekyll-theme-minimal";
+@import "./visual.css";
+@import "./bootstrap-grid.min.css";
+
+// define some constance here
+$body_padding: 1rem;
+$header_height: 4rem;
+$theme-main-color: lightgray;
+$sidebar-width-fixed: 25vh;
+
+body {
+    margin: 0;
+    padding: $body_padding;
+}
+
+button {
+    display: inline-flex;
+    align-items: stretch;
+    a {
+        display: inline-flex;
+        align-items: center;
+        color: unset;
+    }
+}
+
+header#header {
+    position: fixed;
+    box-sizing: border-box; // height includes everything
+    float: none;
+    width: unset;
+    background-color: $theme-main-color;
+    height: $header_height;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding: .5rem 1.5rem;
+    column-gap: .5rem;
+    .header-link {
+        button {
+            height: 100%;
+            border: none;
+            border-radius: 5px;
+            background: $theme-main-color;
+            font-weight: bolder;
+            cursor: pointer;
+            &:hover {
+                filter: brightness(0.95);
+            }
+        }
+        &::after {
+            content: "|";
+            margin: 0 .25rem;
+        }
+        &:last-child::after {
+            content: none;
+        }
+    }
+}
+
+button.print-button {
+    align-items: center;
+    column-gap: .25rem;
+}
+button.icon-button {
+    svg {
+        width: 1rem;
+        height: 1rem;
+        position: relative;
+    }
+}
+
+div.main-container {
+    width: 100%;
+    margin: $header_height 0 0 0;
+    flex-wrap: nowrap;
+}
+
+aside#site-toc {
+    padding: $body_padding 0 0 0;
+    position: fixed;
+    top: $header_height;
+    width: $sidebar-width-fixed;
+    height: 100%;
+    border-right: 1px solid lightgray;
+    [dir="rtl"] & { border-right: 0; border-left: 1px solid lightgray }
+    ul {
+        list-style-type: none;
+        padding-inline-start: 1rem;
+        margin-bottom: 0;
+        li {
+            user-select: none;
+            &.dir {
+                > .sidebar-entry {
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    .handle {
+                        position: relative;
+                        font-size: 1.1rem;
+                        font-weight: normal;
+                        margin: 0 .5rem;
+                        transition: transform .25s;
+                        transform: scaleY(1.5);
+                        top: -1px;
+                    }
+                }
+                &.collapsed ul {
+                    visibility: hidden!important;
+                    opacity: 0;
+                    max-height: 1px;
+                    transition: visibility .25s, opacity .25s, max-height .25s;
+                    transition-timing-function: ease-out;
+                }
+                &.expended {
+                    > ul {
+                        visibility: visible;
+                        opacity: 1;
+                        max-height: 100vh;
+                        transition: visibility .25s, opacity .5s, max-height .5s;
+                        transition-timing-function: ease-in-out;
+                    }
+                    > .sidebar-entry .handle {
+                        transform: rotate(90deg) scaleY(1.5);
+                        top: 0;
+                        left: 1px;
+                    }
+                }
+            }
+
+            .sidebar-entry {
+                background: white;
+                width: 100%;
+                line-height: 2rem;
+                display: flex;
+                align-items: center;
+                padding-inline-start: .5rem;
+                justify-content: space-between;
+                box-sizing: border-box;
+                &:hover {
+                    font-weight: bold;
+                    filter: brightness(0.95);
+                }
+            }
+        }
+    }
+    > ul {
+        padding-inline-start: 0;
+    }
+    overflow: auto;
+}
+
+div.main-content {
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+  div.main-content {
+      width: calc(80% - #{$sidebar-width-fixed});
+      margin-left: $sidebar-width-fixed;
+      [dir="rtl"] & { margin-left: unset; margin-right: $sidebar-width-fixed; }
+  }
+}
+
+
+aside.page-toc {
+    position: fixed;
+    width: 20%;
+    right: 0;
+    [dir="rtl"] & { right: unset; left: 0 }
+    ul {
+        padding-inline-start: 1rem;
+        li {
+            padding: .5rem 0;
+        }
+    }
+    > ul > li > *:first-child::after {
+        content: "";
+        display: block;
+        width: 100%;
+        border-bottom: 1px solid lightgray;
+        padding-bottom: .5rem;
+    }
+}
+
+body.print {
+  padding: 0;
+  margin: 0;
+  div.page-content {
+    padding: 1.5rem;
+  }
+  .page-break {
+    page-break-after: always;
+  }
+}

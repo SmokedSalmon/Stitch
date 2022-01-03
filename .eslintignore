@@ -1,0 +1,13 @@
+dist/
+lib/
+
+# unit test related
+*.config.*
+*.setup.*
+coverage
+jest_coverage
+__tests__
+__mocks__
+*.spec.*
+*.test.*
+*.snap

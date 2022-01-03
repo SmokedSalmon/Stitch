@@ -1,0 +1,32 @@
+{
+  "$id": "schemas/app.json",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "MFE Application name, unique in your application",
+      "type": "string"
+    },
+    "mode": {
+      "description": "Web, IFrame,  default is Web",
+      "type": "string",
+      "enum": ["Web", "IFrame"],
+      "default": "Web"
+    },
+    "routerName": {
+      "description": "Name used to match in router, default to name if missing",
+      "type": "string"
+    },
+    "options": {
+      "description": "Feature control options for the MFE Application",
+      "type": "object",
+      "properties": {}
+    },
+    "styles": {
+      "description": "Names of styles defined above, which are associated with this MFE App",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["name", "mode"]
+}

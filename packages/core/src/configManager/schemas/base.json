@@ -1,0 +1,60 @@
+{
+  "$id": "schemas/base.json",
+  "type": "object",
+  "properties": {
+    "org": {
+      "type": "object",
+      "properties": {
+        "product": {
+          "description": "Product or channel name",
+          "type": "string"
+        },
+        "GBGF": {
+          "description": "GBGF name",
+          "type": "string"
+        },
+        "EIM": {
+          "description": "EIM ID for this product",
+          "type": "string"
+        }
+      },
+      "required": ["product"]
+    },
+    "env": {
+      "type": "string",
+      "enum": ["Dev", "Prod"],
+      "default": "Prod"
+    },
+    "routerPath": {
+      "description": "Configurable router sub path that AppHost parse and extract from URL to identify the app name",
+      "type": "string"
+    },
+    "hosts": {
+      "type": "array",
+      "items": { "$ref": "host.json" }
+    },
+    "libs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "lib.json" }
+    },
+    "services": {
+      "description": "Settings for system and custom services",
+      "type": "array",
+      "oneOf": [
+        {
+          "items": { "$ref": "service.json" }
+        },
+        {
+          "type": "undefined"
+        }
+      ]
+    },
+    "globalOptions": {
+      "description": "Overall feature control options of the entire application",
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "required": ["env", "routerPath", "libs"]
+}
