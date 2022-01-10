@@ -2,14 +2,18 @@ import { MFEService } from '@stitch/types'
 
 import configManager from '../configManager'
 import loadModule from '../utils/loadModule'
-import { messageService, styleService } from '../services'
+import { messageService, styleService, RouterService } from '../services'
+import { a1, a2, b1, b2, b3, circular_b4, c1, c2, d1, d2 } from '../services'
 import {
   SERVICE_TYPE_SYSTEM,
   SERVICE_TYPE_LIB,
-  SERVICE_TYPE_CUSTOMIZED
+  SERVICE_TYPE_CUSTOMIZED,
+  SERVICE_AUTOLOAD
 } from './constants'
 import { globalState } from '../utils'
-import { MESSAGE_SERVICE, STYLE_SERVICE, SERVICE_STATUS } from '../constants'
+import {
+  MESSAGE_SERVICE, STYLE_SERVICE, SERVICE_STATUS, ROUTER_SERVICE, MAX_SERVICE_DEPENDENCY_DEPTH
+} from '../constants'
 import HostContext from '../HostContext'
 
 /**
@@ -18,13 +22,14 @@ import HostContext from '../HostContext'
 
 const systemServices = {
   [MESSAGE_SERVICE]: messageService,
-  [STYLE_SERVICE]: styleService
+  [STYLE_SERVICE]: styleService,
+  a1, a2, b1, b2, b3, circular_b4, c1, c2, d1, d2
 }
 
 /**
  * Filter services by object parameter
- * @param {ServiceConfig} serviceConfig - given service's config
- * @param {ServiceConfig} params - parameter object for desired service
+ * @param {ManagedServiceConfig} serviceConfig - given service's config
+ * @param {ManagedServiceConfig} params - parameter object for desired service
  * @return {boolean}
  */
 function filterServiceByParams (serviceConfig, params = {}) {
@@ -34,8 +39,8 @@ function filterServiceByParams (serviceConfig, params = {}) {
 
 /**
  * Filter services by an enumerator function, which takes a variable as the passed-in service definition/config
- * @param {ServiceConfig} serviceConfig
- * @param {function(ServiceConfig):boolean} func
+ * @param {ManagedServiceConfig} serviceConfig
+ * @param {function(ManagedServiceConfig):boolean} func
  * @return {boolean}
  */
 function filterServiceByFunc (serviceConfig, func) {
@@ -121,12 +126,44 @@ class ServiceManager {
       })
   }
 
-  #addressStaticDep (serviceName) {
+  /**
+   * Circular dependency check and notify user if detected
+   * @param item {string}
+   * @param ancestors {Set.<string>} hireachy relationship above the item
+   * @return {boolean}
+   */
+  #checkCircularDependency (item, ancestors = new Set()) {
+    if (ancestors.has(item)) {
+      const parent = [...ancestors].pop()
+      console.warn(`===> Circular dependencies detected, ${item} is required by ${parent} that is also ${item}'s sub-service`)
+      console.warn(`===> Dependency chain: ${[...ancestors, item].join(' -> ')}`)
+      console.warn(`===> ${parent} will start regardless of ${item} status`)
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Address a single service node in the service dependency tree process
+   * @private
+   * @param {string} serviceName
+   * @param {Set<string>} ancestors
+   * @return {*}
+   */
+  async #addressStaticDep (serviceName, ancestors = new Set()) {
+    // If the same service is already in the dependency tree, use it to avoid duplicated start
     if (this.#serviceStartNode[serviceName]) return this.#serviceStartNode[serviceName]
-    const service = this.getService(serviceName)
+
+    // Circular dependency detection
+    if (this.#checkCircularDependency(serviceName, ancestors)) return Promise.resolve();
+
+    let servicePromise
+    const service = await this.getService(serviceName)
     const subRequireServices = service.require && service.require()
+
+    /* Atomic service, there are no sub-services */
     if (!subRequireServices || !subRequireServices.length) {
-      const servicePromise = new Promise((resolve, reject) => {
+      servicePromise = new Promise((resolve, reject) => {
         // create a thunk function to delay the actual start of the service AFTER the static tree is completely resolved
         const startAtomicService = () => {
           try {
@@ -143,9 +180,21 @@ class ServiceManager {
       return servicePromise
     }
 
-    const subServicePromises = subRequireServices.map(subServiceName => this.#addressStaticDep(subServiceName))
-    const servicePromise = Promise.allSettled(subServicePromises).then(() => {
+    /* Service that has other sub-services */
+    // Dependency depth limit
+    if (ancestors.size > (MAX_SERVICE_DEPENDENCY_DEPTH - 1)) {
+      console.warn(`===> Service dependency depth exceeds ${MAX_SERVICE_DEPENDENCY_DEPTH}, ${serviceName} will start immediately without requiring sub-services`)
+      servicePromise = Promise.resolve(service.start())
+      this.#serviceStartNode[serviceName] = servicePromise
+      return servicePromise
+    }
+
+    const ancestorsChain = new Set([...ancestors]) // new chain otherwise the same chain is used by the entire dependency tree
+    ancestorsChain.add(serviceName)
+    const subServicePromises = subRequireServices.map(subServiceName => this.#addressStaticDep(subServiceName, ancestorsChain))
+    servicePromise = Promise.allSettled(subServicePromises).then(() => {
       try {
+        console.log(`===> ${serviceName}'s sub-services: "${subRequireServices}" are all settled`)
         return Promise.resolve(
           service.getStatus() !== SERVICE_STATUS.stopped ? null : service.start(new HostContext('service', serviceName, subRequireServices))
         )
@@ -166,7 +215,7 @@ class ServiceManager {
    */
   getService (name = '') {
     let instance = this.#serviceCache[name]
-    if (instance) return instance
+    if (instance) return Promise.resolve(instance);
 
     const serviceConfig = configManager.getServiceConfig(name)
     if (!serviceConfig) {
@@ -181,7 +230,7 @@ class ServiceManager {
     // The service is required for the first time, we will load it
     const {
       type, libName,
-      autoLoad, disabled, protected: isProtected // avoid `'protected' is reserved syntax error`
+      autoLoad, disabled, protected: isProtected, options // avoid `'protected' is reserved syntax error`
     } = serviceConfig
     // system service is ALWAYS protected
     const shouldProtect = type === SERVICE_TYPE_SYSTEM ? true : (isProtected || false)
@@ -201,7 +250,11 @@ class ServiceManager {
 
     switch (type) {
       case SERVICE_TYPE_SYSTEM:
-        instance = systemServices[name]
+        if (name === ROUTER_SERVICE) {
+          instance = new RouterService(options, globalState.history)
+        } else {
+          instance = systemServices[name]
+        }
         break
       case SERVICE_TYPE_LIB:
         instance = this.#loadLibService(name)
@@ -293,15 +346,15 @@ class ServiceManager {
    * Construct and initiate services against filter criteria. filter could be a partial object of service config
    * For example: ServiceManager.getServices({ protected: true }) // get all the active protected services
    * @param {object|function} [criteria]
-   * @return {Array.<SystemService | Object.<LibService> | Promise.<Object.<LibService>> | Object.<CustomizedService>>}
+   * @return {Promise.<(SystemService|LibService|CustomizedService)[]>}
    */
   getServices (criteria = {}) {
     const serviceMetasFromConfigs = Object.keys(configManager.getServiceConfig())
       .map(i => configManager.getServiceConfig()[i])
-      .filter(serviceConfig => !this.#servicesWithError.has(serviceConfig.serviceName))
+      .filter(serviceConfig => !this.#servicesWithError.has(serviceConfig.name))
       .map(serviceConfig => {
-        const serviceMeta = { ...serviceConfig, name: serviceConfig.serviceName }
-        delete serviceMeta.serviceName
+        const serviceMeta = { ...serviceConfig, name: serviceConfig.name }
+        delete serviceMeta.name
         return serviceMeta
       })
 
@@ -319,15 +372,17 @@ class ServiceManager {
       throw new TypeError('Invalid service filter criteria is provided.')
     }
 
-    return serviceMetas
-      .filter(serviceMeta => !serviceMeta.disabled) // if disabled, it is not accessible regarding any circumstance
-      .filter(serviceMeta => filterFunc(serviceMeta, criteria))
-      .map(serviceMeta => this.getService(serviceMeta.name))
+    return Promise.allSettled(
+      serviceMetas
+        .filter(serviceMeta => !serviceMeta.disabled) // if disabled, it is not accessible regarding any circumstance
+        .filter(serviceMeta => filterFunc(serviceMeta, criteria))
+        .map(serviceMeta => this.getService(serviceMeta.name))
+    )
   }
 
   /**
    * @param {Array.<string>} requiredServices
-   * @return {Promise.<Array>}
+   * @return {Promise.<StartServicesResults>}
    */
   startServices (requiredServices) {
     if (!Array.isArray(requiredServices)) {
@@ -340,15 +395,23 @@ class ServiceManager {
 
     // static tree analysis step. Construct a static dependency tree (linked by Promise.all) top down. Started with given service as the top level (entry points)
     requiredServices.forEach(serviceName => this.#addressStaticDep(serviceName))
+
     // actually start all the atomic Services (services that DO NOT require any other service)
     this.#atomicServiceSequence.forEach(startAtomicService => startAtomicService())
     const servicePromises = requiredServices.map(serviceName => this.#serviceStartNode[serviceName])
     return Promise.allSettled(servicePromises).then(
-      () => ({
-        success: [...requiredServices],
-        // TODO start Services error stack
-        errors: []
-      }),
+      () => (
+        /**
+         * @typedef {Object} StartServicesResults
+         * @property {Array.<ManagedServiceConfig.name>} success
+         * @property {Array.<ManagedServiceConfig.name>} errors
+         */
+        {
+          success: [...requiredServices],
+          // TODO start Services error stack
+          errors: []
+        }
+      ),
       // This is total crash, error must be printed otherwise it might not be verbal if it is caught by downstream promise chain
       (err) => {
         console.error(err)
@@ -358,12 +421,23 @@ class ServiceManager {
   }
 
   /**
-   * Start all services in Stitch.start()
-   * @return {Promise.<Array>}
+   * Start prioritized/critical services in Stitch.start()
+   * [Attention] This is intended to use during Stitch.start() only. And run after all Async service loaded already (e.g Library services loaded)
+   * If you use somewhere else, use with discretion;
+   * @return {Promise.<StartServicesResults>}
    */
-  startAllServices () {
-    // TODO
-    return Promise.allSettled([])
+  async startAllServices () {
+    return await this.getServices({ type: SERVICE_TYPE_LIB, [SERVICE_AUTOLOAD]: true }).then(() => {
+      const availableServices = Object.values(this.#serviceMetas).filter(service => !service.disabled)
+
+      // At current version, we start all system services + autoLoad library services + customized services upon Stitch start
+      const systemServices = availableServices.filter(service => service.type === SERVICE_TYPE_SYSTEM)
+      const autoLoadLibServices = availableServices.filter(service =>
+        (service.type === SERVICE_TYPE_LIB && service[SERVICE_AUTOLOAD])
+      )
+      const customizedServices = Object.values(this.#serviceMetas).filter(service => service.type === SERVICE_TYPE_CUSTOMIZED)
+      return this.startServices([...systemServices, ...autoLoadLibServices, ...customizedServices])
+    })
   }
 }
 

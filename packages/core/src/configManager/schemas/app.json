@@ -4,7 +4,8 @@
   "properties": {
     "name": {
       "description": "MFE Application name, unique in your application",
-      "type": "string"
+      "type": "string",
+      "pattern": "^[\\w-]+$"
     },
     "mode": {
       "description": "Web, IFrame,  default is Web",
@@ -14,7 +15,13 @@
     },
     "routerName": {
       "description": "Name used to match in router, default to name if missing",
-      "type": "string"
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[^\\\/\\s]+$"
+      },
+      "default": []
     },
     "options": {
       "description": "Feature control options for the MFE Application",

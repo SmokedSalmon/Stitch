@@ -1,6 +1,6 @@
 {
   "name": "@stitch/core",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "Stitch core",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -8,7 +8,7 @@
     "dist/"
   ],
   "scripts": {
-    "prebuild": "rm -rf dist",
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
     "build:dev": "rollup -c -m -w",
     "lint": "eslint \"src/**/*.js\"",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@babel/runtime": "7.x",
-    "@stitch/types": "^1.0.0-alpha.0",
+    "@stitch/types": "^1.0.0-alpha.1",
     "core-js": "^3.9.1",
     "lodash": "4.x"
   },

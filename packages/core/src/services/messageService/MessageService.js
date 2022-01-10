@@ -1,7 +1,6 @@
 import { MFEService } from '@stitch/types'
 
 import MessageServiceClient from './MessageServiceClient'
-import configManager from '../../configManager'
 
 const POST = 'Post'
 const SEND = 'Send'
@@ -57,7 +56,7 @@ class MessageService extends MFEService {
       return new MessageServiceClient(this, name)
     }
 
-    return new MessageServiceClient(this, configManager.getOrgConfig().Product)
+    return new MessageServiceClient(this, this.hostContext.config.getOrgConfig().Product)
   }
 
   /**

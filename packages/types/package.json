@@ -1,6 +1,6 @@
 {
   "name": "@stitch/types",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Stitch types",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -8,7 +8,7 @@
     "dist/"
   ],
   "scripts": {
-    "prebuild": "rm -rf dist",
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
     "build:dev": "rollup -c -m -w",
     "lint": "ts-standard \"src/**/*.ts\"",

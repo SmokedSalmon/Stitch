@@ -29,7 +29,7 @@ class Config {
 
   /**
    * @param {string} appName
-   * @return {AppConfig}
+   * @return {ManagedAppConfig}
    */
   getAppConfig (appName) {
     return cloneDeep(configManager.getAppConfig(appName))
@@ -37,7 +37,7 @@ class Config {
 
   /**
    * @param {string} serviceName
-   * @return {ServiceConfig}
+   * @return {ManagedServiceConfig}
    */
   getServiceConfig (serviceName) {
     return cloneDeep(configManager.getServiceConfig(serviceName))

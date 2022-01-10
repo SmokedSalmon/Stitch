@@ -2,7 +2,7 @@
   "$id": "schemas/lib.json",
   "type": "object",
   "properties": {
-    "libName": {
+    "name": {
       "description": "Unique lib name exposed in WebPack5 module federation",
       "type": "string"
     },
@@ -40,5 +40,5 @@
       ]
     }
   },
-  "required": ["libName", "resource"]
+  "required": ["name", "resource"]
 }

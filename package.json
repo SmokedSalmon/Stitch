@@ -13,13 +13,8 @@
     "install:fix": "yarn install --ignore-scripts && npm rebuild core-js && npm run postinstall",
     "lint": "yarn workspaces run lint",
     "lint:stage": "eslint --fix",
-    "publish:core": "node ./scripts/publish.js --package=core",
-    "publish:less-helper": "node ./scripts/publish.js --package=less-helper --lint=false --test=false --build=false",
-    "publish:less-plugin-functions": "node ./scripts/publish.js --package=less-plugin-functions --lint=false --test=false --build=false",
-    "publish:less-plugin-relative-em": "node ./scripts/publish.js --package=less-plugin-relative-em",
-    "publish:react": "node ./scripts/publish.js --package=react",
-    "publish:types": "node ./scripts/publish.js --package=types",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "test_rm": "rm -rf temp"
   },
   "repository": {
     "type": "git",
@@ -57,6 +52,7 @@
     "jest": "^27.3.1",
     "lint-staged": "^12.1.2",
     "lodash": "^4.17.21",
+    "rimraf": "^3.0.2",
     "rollup": "^2.60.1",
     "rollup-plugin-cleanup": "^3.2.1",
     "standard": "^16.0.4",

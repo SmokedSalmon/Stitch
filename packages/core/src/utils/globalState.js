@@ -1,7 +1,7 @@
 class GlobalState {
   #configEnv
   #stitchStart
-  #router // TODO remove
+  #history
 
   constructor () {
     // this.#configEnv = 'Prod' // default value depends on the schema
@@ -30,14 +30,12 @@ class GlobalState {
     this.#stitchStart = !!value
   }
 
-  /** @deprecated TODO remove */
-  get router () {
-    return this.#router
+  get history () {
+    return this.#history
   }
 
-  /** @deprecated TODO remove */
-  set router (value) {
-    this.#router = value
+  set history (value) {
+    this.#history = value
   }
 }
 

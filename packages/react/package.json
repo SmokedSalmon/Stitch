@@ -8,12 +8,16 @@
     "dist/"
   ],
   "scripts": {
-    "prebuild": "rm -rf dist",
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
+    "build:dev": "rollup -c -m -w",
     "lint": "eslint \"src/**/*.{js,jsx}\"",
     "test": "jest"
   },
-  "repository": "https://alm-github.systems.uk.hsbc/Net-UI/stitch.git",
+  "repository": {
+    "type": "git",
+    "url": "https://alm-github.systems.uk.hsbc/Net-UI/stitch.git"
+  },
   "keywords": [
     "stitch",
     "micro front-end",

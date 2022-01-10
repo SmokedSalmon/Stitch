@@ -11,5 +11,5 @@ When MFE App is mounted, the System Service can be get from its [Host Context](h
 ## Table of Contents
 
 - [Message Service](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.1.Message_Service.md)
-- [Routing Service](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Routing_Service/index.md)
+- [Router Service](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/index.md)
 - [Style Service](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.3.Style_Service.md)

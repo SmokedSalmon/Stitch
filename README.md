@@ -22,7 +22,7 @@ NOTE: @stitch/* only be released in the following internal nexus registries:
   - [Integration](/docs/2.Getting_Started/2.3.Integration.md)
 - [Config Schema](/docs/3.Config_Schema.md)
 - [API Reference](/docs/4.API.md)
-- [MFE App](/docs/5.MFE_App/index.md)
+- MFE App
   - [Interface](/docs/5.MFE_App/5.1.Interface.md)
   - [Host Context](/docs/5.MFE_App/5.2.Host_Context.md)
   - [Webpack Config](/docs/5.MFE_App/5.3.Webpack_Config.md)
@@ -34,6 +34,7 @@ NOTE: @stitch/* only be released in the following internal nexus registries:
 - Best Practices
   - [Shared Dependencies](/docs/7.Best_Practice/7.1.Shared_Dependencies.md)
   - [Styling](/docs/7.Best_Practice/7.2.Styling.md)
+  - [Routing Example](/docs/7.Best_Practice/7.3.Routing_Example.md)
 
 ## Developer guide
 

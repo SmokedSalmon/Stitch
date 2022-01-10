@@ -1,8 +1,7 @@
 import appManager from './appManager'
 import configManager from './configManager'
-import serviceManager, { SERVICE_TYPE_LIB, SERVICE_AUTOLOAD } from './serviceManager'
+import serviceManager, { SERVICE_TYPE_LIB, SERVICE_AUTOLOAD, SERVICE_TYPE_SYSTEM } from './serviceManager'
 import { globalState } from './utils'
-import { RouterAdaptor } from './adaptor/router'
 
 class Stitch {
   #state
@@ -13,18 +12,14 @@ class Stitch {
     Object.freeze(this)
   }
 
-  config ({ config, router }) {
+  config (config, { history }) {
     configManager.updateConfig(config)
 
-    if (!router) {
-      throw new Error('Please provide a router instance for Stitch.')
+    if (!history) {
+      console.warn('Please provide a history instance for Stitch if you want to enable router Service.')
     }
 
-    if (!(router instanceof RouterAdaptor)) {
-      throw new Error('The Router must be an implementation of RouterAdaptor.')
-    }
-
-    this.#state.router = router
+    this.#state.history = history
   }
 
   start () {
@@ -32,12 +27,12 @@ class Stitch {
       throw new Error('The Stitch has been started.')
     }
 
-    return Promise.all(serviceManager.getServices({ type: SERVICE_TYPE_LIB, [SERVICE_AUTOLOAD]: true }))
+    return serviceManager.getServices({ type: SERVICE_TYPE_LIB, [SERVICE_AUTOLOAD]: true })
       .then(() => {
         this.#state.stitchStart = true
 
-        // start some critical/high priority service first
-        serviceManager.startServices(['message_service', 'style_service'])
+        // start all prioritized/critical services
+        serviceManager.startAllServices()
 
         return this
       }).catch(() => {

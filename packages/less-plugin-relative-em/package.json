@@ -1,6 +1,6 @@
 {
   "name": "@stitch/less-plugin-relative-em",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Calculate the em value based on relative base font less variable",
   "main": "dist/index.js",
   "files": [

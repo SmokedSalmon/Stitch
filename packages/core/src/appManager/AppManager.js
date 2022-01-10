@@ -2,7 +2,7 @@ import { MFEApp } from '@stitch/types'
 
 import loadModule from '../utils/loadModule'
 import configManager from '../configManager'
-import HostContext from '../HostContext'
+import createHostContext from '../HostContext'
 import serviceManager from '../serviceManager'
 import { APP_STATUS, REMOTE_APP } from '../constants'
 
@@ -11,7 +11,7 @@ class AppManager {
 
   /**
    * Return a promise with remote app instance as result
-   * @param {AppConfig} appConfig
+   * @param {ManagedAppConfig} appConfig
    * @return {Promise<any>}
    */
   #loadAppInstance (appConfig) {
@@ -67,60 +67,63 @@ class AppManager {
   getApp (appName) {
     const appCache = this.#appCache
     return new Promise((resolve, reject) => {
+      // get app from cache
       if (appCache[appName] && appCache[appName].instance) {
-        appCache[appName].state = APP_STATUS.Loaded
-        resolve(appCache[appName])
+        resolve(appCache[appName].instance)
         return
       }
-      const config = configManager.getAppConfig(appName)
-      const app = {
-        config,
+
+      // put the app in cache
+      appCache[appName] = {
         instance: null,
         state: APP_STATUS.NotLoaded,
         hostContext: null
       }
-      appCache[appName] = app
+      const app = appCache[appName]
+
+      // can't find app in appConfig
+      const config = configManager.getAppConfig(appName)
       if (!config || !config.name) {
         app.state = APP_STATUS.NotDefined
-        reject(new Error(`Can not find app with name {${appName} in config`))
+        reject(new Error(`Can not find app with name '${appName}' in config`))
         return
       }
 
-      const resolveApp = (requireServices) => {
-        app.state = APP_STATUS.Loaded
-        app.hostContext = new HostContext('app', appName, requireServices)
-        resolve(app)
-      }
-      const resolveAppError = (error) => {
+      const loadAppError = (error) => {
         app.state = APP_STATUS.LoadError
         reject(error)
       }
-
-      this.#loadAppInstance(config).then((instance) => {
-        if (!(instance instanceof MFEApp)) {
-          console.warn(`App '${appName}' is not instance of MFEApp from @stitch/types`)
-        }
+      this.#loadAppInstance(config).then(instance => {
 
         app.instance = instance.getApp && instance.getApp(appName)
 
         if (app.instance) {
-          const requiredServices = app.instance.require && app.instance.require()
-
-          if (requiredServices && requiredServices.length) {
-            // cache the requiredServices for forceInit()
-            this.#appCache[appName].requiredServices = requiredServices
-
-            serviceManager.startServices(requiredServices).then(resolveApp).catch(resolveAppError)
-          } else {
-            // support empty require or none demand services
-            resolveApp()
+          if(!app.instance.init || !app.instance.mount || !app.instance.unmount) {
+            loadAppError(new Error(`Can not find all life cycle functions in app: '${appName}' `))
+            return
           }
+          const requiredServices = app.instance.require && app.instance.require() || []
+          const dummyRequiredServices = ['a1', 'a2']
+          console.log('=== Start services ===')
+
+          // cache the requiredServices for forceInit()
+          // this.#appCache[appName].requiredServices = requiredServices
+          // serviceManager.startServices(requiredServices)
+          this.#appCache[appName].requiredServices = dummyRequiredServices
+          serviceManager.startServices(dummyRequiredServices)
+            .then(requireServices => {
+              app.state = APP_STATUS.Loaded
+              app.hostContext = createHostContext('app', appName, requireServices.success)
+              Promise.resolve(app.instance.init(app.hostContext))
+                .then(() => {
+                  app.state = APP_STATUS.Initialized
+                  resolve(app.instance)
+                }).catch(loadAppError)
+            }).catch(loadAppError)
           return
         }
-
-        resolveAppError(new Error(`Can not find app with name '${appName}' in instance`))
-      })
-        .catch(resolveAppError)
+        loadAppError(new Error(`Can not find app with name '${appName}' in instance`))
+      }).catch(loadAppError)
     })
   }
 
@@ -140,6 +143,22 @@ class AppManager {
     return this.#appCache[appName].state
   }
 
+  setState (appName, state) {
+    if (!this.#appCache[appName]) {
+      console.warn(`Can not find app with name '${appName}' in setState`)
+      return
+    }
+    this.#appCache[appName].state = state
+  }
+
+  getHostContext (appName) {
+    if (!this.#appCache[appName]) {
+      console.warn(`Can not find app with name '${appName}' in getHostContext`)
+      return null
+    }
+    return this.#appCache[appName].hostContext
+  }
+
   getConfig (appName) {
     return configManager.getAppConfig(appName)
   }
@@ -155,7 +174,7 @@ class AppManager {
       this.getApp(appName)
       return
     }
-    this.#appCache[appName].hostContext = new HostContext('app', appName, this.#appCache[appName].requiredServices)
+    this.#appCache[appName].hostContext = createHostContext('app', appName, this.#appCache[appName].requiredServices)
     this.#appCache[appName].state = APP_STATUS.Loaded
   }
 }

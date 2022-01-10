@@ -36,3 +36,5 @@ export const ROUTER_MODE_HASH = 'hash'
 export const ROUTER_SERVICE = 'router_service'
 export const MESSAGE_SERVICE = 'message_service'
 export const STYLE_SERVICE = 'style_service'
+
+export const MAX_SERVICE_DEPENDENCY_DEPTH = 10

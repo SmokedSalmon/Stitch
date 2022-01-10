@@ -52,7 +52,7 @@ export default abstract class MFEService implements IMFEService {
   }
 
   stop (): void {
-    this._status = 'stopped'
+    this.#status = 'stopped'
   }
 
   getStatus (): MFEServiceStatus {

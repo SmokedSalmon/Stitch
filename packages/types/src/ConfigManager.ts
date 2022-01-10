@@ -11,9 +11,7 @@ export type Env = 'Dev' | 'Prod'
 export interface StyleConfig {
   uniqueID: string
 
-  styleName: string
-
-  libName: string
+  name: string
 
   styleUrl: string
 
@@ -23,13 +21,9 @@ export interface StyleConfig {
 export interface AppConfig {
   name: string
 
-  libName: string
-
-  libUrl: string
-
   mode: 'Web' | 'IFrame'
 
-  routerName?: string
+  routerName?: string[]
 
   styles: StyleConfig[]
 
@@ -39,13 +33,7 @@ export interface AppConfig {
 export type ServiceType = 'SYSTEM' | 'LIB' | 'CUSTOMIZED'
 
 export interface ServiceConfig {
-  serviceName: string
-
-  type: ServiceType
-
-  libName?: string
-
-  libUrl?: string
+  name: string
 
   autoLoad?: boolean
 

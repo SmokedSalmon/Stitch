@@ -4,8 +4,8 @@ import RequiredServices from './RequiredServices'
 export default class HostContext {
   /**
    * @param {'host' | 'app' | 'service'} type
-   * @param {string} targetName
-   * @param {Array.<string>} [requiredServices]
+   * @param {ManagedAppConfig.name | ManagedServiceConfig.name | Org.Product | string} targetName
+   * @param {Array.<ManagedServiceConfig.name>} [requiredServices]
    */
   constructor (type, targetName, requiredServices) {
     this.targetName = targetName

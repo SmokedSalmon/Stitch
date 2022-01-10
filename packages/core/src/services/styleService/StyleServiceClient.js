@@ -15,33 +15,32 @@ class StyleServiceClient {
    * @param {string} styleName
    * @return {boolean}
    */
-  hasStyle (styleName) {
-    return this.#styleService.hasStyle(this.#libName, styleName)
+  isStyleLoaded (styleName) {
+    return this.#styleService.isStyleLoaded(this.#libName, styleName)
   }
 
   /**
-   * @param {string | null} styleName
-   * @param {InjectStyleParamOptions} [options]
+   * @param {string} [styleName]
+   * @param {object} [styleAttrs] - the html attributes of link elements
    * @return {Promise}
    */
-  loadStyle (styleName, options) {
+  loadStyle (styleName, { styleAttrs } = {}) {
     if (styleName) {
-      return this.#styleService.loadStyle(this.#libName, styleName, options.styleAttrs)
+      return this.#styleService.loadStyle(this.#libName, styleName, { styleAttrs })
     }
 
-    return this.#styleService.loadAppStyles(this.#appName, options)
+    return this.#styleService.loadAppStyles(this.#appName, { styleAttrs })
   }
 
   /**
-   * @param {string | null} styleName
-   * @param {InjectStyleParamOptions} [options]
+   * @param {string} [styleName]
    */
-  unloadStyle (styleName, options) {
+  unloadStyle (styleName) {
     if (styleName) {
       this.#styleService.unloadStyle(this.#libName, styleName)
     }
 
-    this.#styleService.unloadAppStyles(this.#appName, options)
+    this.#styleService.unloadAppStyles(this.#appName)
   }
 }
 

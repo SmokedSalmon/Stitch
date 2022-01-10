@@ -1,5 +1,3 @@
-import { isMatch } from 'lodash'
-
 import { MFEService } from '@stitch/types'
 
 import StyleServiceClient from './StyleServiceClient'
@@ -98,7 +96,7 @@ class StyleService extends MFEService {
    * @param {string} styleName
    * @return {boolean}
    */
-  hasStyle (libName, styleName) {
+  isStyleLoaded (libName, styleName) {
     return !!getInjectedStyle(this.#getStyleUniqueID(libName, styleName))
   }
 
@@ -124,28 +122,14 @@ class StyleService extends MFEService {
   }
 
   /**
-   * @typedef {object} InjectStyleParamOptions
-   * @property {object | function} [filter]
-   * @property {object} [styleAttrs] - the html attributes of link elements
-   */
-
-  /**
    * @param {string} appName
-   * @param {InjectStyleParamOptions} [options]
+   * @param {object} [styleAttrs] - the html attributes of link elements
    * @return {Promise.<Array>}
    */
-  loadAppStyles (appName, options = {}) {
-    const { styleAttrs } = options
-    let { filter = config => config } = options
-
-    if (typeof filter === 'object') {
-      filter = config => isMatch(config, filter)
-    }
-
+  loadAppStyles (appName, { styleAttrs } = {}) {
     const loadAppStylesPromises = []
 
     this.hostContext.config.getAppConfig(appName).styles
-      .filter(filter)
       .forEach(({ uniqueID }) => {
         const href = this.hostContext.config.getStyleConfig(uniqueID)[0].styleUrl
         loadAppStylesPromises.push(loadStyleById(uniqueID, href, { styleAttrs }))
@@ -156,17 +140,9 @@ class StyleService extends MFEService {
 
   /**
    * @param {string} appName
-   * @param {InjectStyleParamOptions} [options]
    */
-  unloadAppStyles (appName, options = {}) {
-    let { filter = config => config } = options
-
-    if (typeof filter === 'object') {
-      filter = config => isMatch(config, filter)
-    }
-
+  unloadAppStyles (appName) {
     this.hostContext.config.getAppConfig(appName).styles
-      .filter(filter)
       .forEach(({ uniqueID }) => {
         unloadStyleById(uniqueID)
       })

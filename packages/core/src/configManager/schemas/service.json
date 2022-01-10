@@ -2,7 +2,7 @@
   "$id": "schemas/service.json",
   "type": "object",
   "properties": {
-    "serviceName": { "type": "string" },
+    "name": { "type": "string" },
     "disabled": {
       "description": "A disabled service will not be initialized and loaded into Service Manager. Default is false",
       "type": "boolean",
@@ -19,5 +19,5 @@
       "properties": {}
     }
   },
-  "required": ["serviceName", "disabled", "protected"]
+  "required": ["name", "disabled", "protected"]
 }

@@ -85,7 +85,7 @@ node("cm-linux") {
 
     // Publish to HSBC internal registries
     stage('Publish to Nexus Registries') {
-      sh "npm run publish:${packageName}"
+      sh "node ./scripts/publish.js --package=${packageName}"
       currentBuild.result = 'SUCCESS'
     }
 

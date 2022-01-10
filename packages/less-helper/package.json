@@ -1,6 +1,6 @@
 {
   "name": "@stitch/less-helper",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Less helpers for Stitch MFE App",
   "main": "lib/index.less",
   "scripts": {
@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "@stitch/less-plugin-functions": "^1.0.1-alpha.0",
-    "@stitch/less-plugin-relative-em": "^1.0.0-alpha.1"
+    "@stitch/less-plugin-relative-em": "^1.0.0-alpha.3"
   }
 }

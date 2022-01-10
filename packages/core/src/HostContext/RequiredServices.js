@@ -1,4 +1,3 @@
-import serviceManager from '../serviceManager' // TODO resolve circular dependency
 
 /**
  * @typedef {MessageServiceClient | StyleServiceClient} SystemServiceClient
@@ -31,18 +30,13 @@ export default class RequiredServices {
   #bindContextServices (requiredServices) {
     // create shortcut of services by MFEApp.require() or MFEService.require()
     if (requiredServices instanceof Array) {
-      requiredServices.forEach((name) => {
-        const availableService = serviceManager.getService(name)
-
-        if (availableService) {
-          this.#serviceCache[name] = availableService.createClient(this.#type, this.#targetName) || availableService
-
+      requiredServices.forEach(({name, service}) => {
+          this.#serviceCache[name] = service
           Object.defineProperty(this, name, {
             get () {
               return this.#serviceCache[name]
             }
           })
-        }
       })
     }
   }
