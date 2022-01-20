@@ -12,7 +12,8 @@ export const APP_STATUS = {
   Initialized: 'Initialized',
   Active: 'Active',
   Inactive: 'Inactive',
-  LoadError: 'LoadError'
+  LoadError: 'LoadError',
+  RunError: 'RunError'
 }
 
 export const SERVICE_STATUS = {

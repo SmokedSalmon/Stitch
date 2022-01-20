@@ -2,11 +2,11 @@ import { IMFEApp } from './MFEApp'
 import { IMFEService } from './MFEService'
 
 export interface IMFELib {
-  getApp?: (name: string) => IMFEApp
+  getApp: (name: string) => IMFEApp | null
 
-  getApps?: () => IMFEApp[]
+  getApps: () => Array<{ name: string, instance: IMFEApp }>
 
-  getService?: (name: string) => IMFEService
+  getService: (name: string) => IMFEService | null
 
-  getServices?: () => IMFEService[]
+  getServices: () => Array<{ name: string, instance: IMFEService }>
 }

@@ -1,5 +1,5 @@
 import { MFEService } from '@stitch/types'
-
+import { log } from '../../utils'
 import MessageServiceClient from './MessageServiceClient'
 
 const POST = 'Post'
@@ -9,13 +9,18 @@ const ALL = 'All'
 const SUCCESS = 'Success'
 const FAILED = 'Failed'
 
-const verifyTopicArg = (topic) => {
+const logger = log.getLogger('messageService')
+
+const isValidateTopic = (topic) => {
   if (!topic) {
-    throw new Error('the topic arg must be exist')
+    logger.error('the topic argument must be exist', 'MS-O-4001')
+    return false
   }
   if (topic && typeof topic !== 'string') {
-    throw new Error('the topic arg must be a string')
+    logger.error('the topic argument must be a string', 'MS-O-4001')
+    return false
   }
+  return true
 }
 
 /**
@@ -55,8 +60,12 @@ class MessageService extends MFEService {
     if (name) {
       return new MessageServiceClient(this, name)
     }
-
-    return new MessageServiceClient(this, this.hostContext.config.getOrgConfig().Product)
+    const { config = {} } = this.hostContext
+    if (typeof config.getOrgConfig === 'function') {
+      return new MessageServiceClient(this, config.getOrgConfig().Product)
+    } else {
+      logger.error('The Stitch config has not been set.', 'SC-P-4004')
+    }
   }
 
   /**
@@ -69,9 +78,10 @@ class MessageService extends MFEService {
    */
   post (sender, topic, data) {
     if (sender === undefined) {
-      console.warn('the message sender be provided')
+      logger.warn('the message sender be provided', 'MS-P-3001')
+      return
     }
-    verifyTopicArg(topic)
+    if (!isValidateTopic(topic)) return
     const message = packMessage(POST, ALL, topic, sender, undefined, data)
     const erros = []
     let handlerName = ''
@@ -85,7 +95,7 @@ class MessageService extends MFEService {
       const errorMessage = packMessage(POST, 'All', topic, sender, FAILED, { error: `function - ${handlerName} from ${sender} has a internal error` })
       erros.push(errorMessage)
     }
-    if (erros.length > 0) console.error(erros)
+    if (erros.length > 0) logger.error(JSON.stringify(erros), 'MS-O-4001')
   }
 
   /**
@@ -101,9 +111,10 @@ class MessageService extends MFEService {
    */
   async send (sender = undefined, topic, data, policy = FIRST, timeout = 5000) {
     if (sender === undefined) {
-      console.warn('the message sender be provided')
+      logger.warn('the message sender be provided', 'MS-P-3001')
+      return
     }
-    verifyTopicArg(topic)
+    if (!isValidateTopic(topic)) return
     let excuteHandlers
     const handlers = this.#hub[topic] || []
     const message = packMessage(POST, policy, topic, sender, undefined, data)
@@ -161,9 +172,10 @@ class MessageService extends MFEService {
    * @return { String }
    */
   sub (topic, handler) {
-    verifyTopicArg(topic)
+    if (!isValidateTopic(topic)) return
     if (typeof handler !== 'function') {
-      throw new Error('the handler should be a function')
+      logger.error('the handler should be a function', 'MS-P-4001')
+      return
     }
     if (!this.#hub[topic]) this.#hub[topic] = []
     this.#hub[topic].push(handler)
@@ -177,9 +189,10 @@ class MessageService extends MFEService {
    * @param { Function } handler The function to unsubscribe from topic
    */
   unsub (topic, handler) {
-    verifyTopicArg(topic)
+    if (!isValidateTopic(topic)) return
     if (typeof handler !== 'function') {
-      throw new Error('the handler should be a function')
+      logger.error('the handler should be a function', 'MS-P-4001')
+      return
     }
     const i = (this.#hub[topic] || []).findIndex(h => h === handler)
     if (i > -1) this.#hub[topic].splice(i, 1)

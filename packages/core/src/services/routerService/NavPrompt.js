@@ -1,6 +1,5 @@
-// [TODO] make it not a service, better naming. Make it a sub-tool of router
-
 import { ROUTER_MODE_BROWSER, ROUTER_MODE_HASH } from '../../constants'
+import { log } from '../../utils'
 
 const emptyFunc = () => {}
 
@@ -32,17 +31,6 @@ function validateOptions (options) {
   return true
 }
 
-/**
- * Check if the given UI information are sufficient
- * @param {Customized_UI_Object|NavPrompt} uiObject
- */
-function validateCustomizeUI (uiObject = {}) {
-  const { show, hide } = uiObject
-  if (typeof show === 'function' && typeof hide === 'function') return true
-  console.error('Insufficient handlers are provided to NavPrompt, you must provided both "show" & "hide" handlers for the customized UI')
-  return false
-}
-
 class NavPrompt {
   #onConfirm
   #onCancel
@@ -52,6 +40,7 @@ class NavPrompt {
   #showConfirmModal
   #hideConfirmModal
   #history
+  #logger = log.getLogger('NavPrompt')
 
   constructor (history) {
     // this.uniqueId = `nav-prompt-${Math.random().toString(32).substr(2)}`
@@ -74,7 +63,7 @@ class NavPrompt {
    */
   configure (options = {}) {
     if (!options) {
-      console.warn('You must provide options')
+      this.#logger.warn('You must provide options', 'RS-P-4101')
       return
     }
     // clear previous working Exit Service
@@ -96,13 +85,24 @@ class NavPrompt {
   }
 
   /**
+ * Check if the given UI information are sufficient
+ * @param {Customized_UI_Object|NavPrompt} uiObject
+ */
+  #validateCustomizeUI (uiObject = {}) {
+    const { show, hide } = uiObject
+    if (typeof show === 'function' && typeof hide === 'function') return true
+    this.#logger.error('Insufficient handlers are provided to NavPrompt, you must provided both "show" & "hide" handlers for the customized UI', 'RS-P-4109')
+    return false
+  }
+
+  /**
    * Set customized UI globally
    * @param {Customized_UI_Object} uiObject
    */
   useCustomizedUI (uiObject) {
     // validate the customized UI elements (handlers & other properties) are provided
-    if (!validateCustomizeUI(uiObject)) {
-      console.warn("Fallback to browser's confirm prompt")
+    if (!this.#validateCustomizeUI(uiObject)) {
+      this.#logger.warn("Fallback to browser's confirm prompt", 'RS-P-4101')
       return
     }
     this.#showConfirmModal = uiObject.show
@@ -147,23 +147,26 @@ class NavPrompt {
    */
   start (options) {
     if (!window) {
-      console.warn('Exit Service currently does NOT support non-browser environment, it will NOT take any effect')
+      this.#logger.warn('Exit Service currently does NOT support non-browser environment, it will NOT take any effect', 'RS-P-4102')
+
       return
     }
 
     if (!this.#history) {
-      console.warn("'history' instance used by main application must be provided")
+      this.#logger.warn("'history' instance used by main application must be provided", 'RS-P-4103')
+
       return
     }
 
     if (options) this.configure(options)
 
     if (!validateOptions(this.#options)) {
-      console.warn('Trying to start exit service without valid options, it will NOT take any effect')
+      this.#logger.warn('Trying to start exit service without valid options, it will NOT take any effect', 'RS-P-4104')
+
       return
     }
 
-    const useCustomizedUI = validateCustomizeUI({
+    const useCustomizedUI = this.#validateCustomizeUI({
       show: this.#showConfirmModal,
       hide: this.#hideConfirmModal
     })
@@ -235,8 +238,9 @@ class NavPrompt {
         },
         (err) => {
           // unexpected redirection error
-          console.warn('Staying the page due to some redirect exception')
-          console.warn(err)
+          this.#logger.warn('Staying the page due to some redirect exception', 'RS-P-4105')
+          this.#logger.warn(err, 'RS-P-4106')
+
           if (typeof this.#options.onCancel === 'function') this.#options.onCancel()
         }
       )
@@ -256,7 +260,8 @@ class NavPrompt {
    */
   cleanUp () {
     if (!window) {
-      console.warn('Exit Service currently does NOT support non-browser environment, it will NOT take any effect')
+      this.#logger.warn('Exit Service currently does NOT support non-browser environment, it will NOT take any effect', 'RS-P-4105')
+
       return
     }
     this.clearDirty()

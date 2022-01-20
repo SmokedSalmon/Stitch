@@ -2,7 +2,7 @@
   "$id": "schemas/host.json",
   "type": "object",
   "properties": {
-    "hostName": {
+    "name": {
       "description": "Web host name",
       "type": "string"
     },
@@ -33,5 +33,5 @@
       "default": "/"
     }
   },
-  "required": ["hostName", "protocol", "server", "publicPath"]
+  "required": ["name", "protocol", "server", "publicPath"]
 }

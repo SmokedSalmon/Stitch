@@ -6,15 +6,18 @@
 /**
  * @typedef {SystemService | SystemServiceClient | Object.<LibService> | Object.<CustomizedService>} HostContextAvailableService
  */
+import { log } from '../utils'
 
 export default class RequiredServices {
   #type
   #targetName
   #serviceCache = {}
+  #logger
 
   constructor (type, targetName, requiredServices) {
     this.#type = type
     this.#targetName = targetName
+    this.#logger = log.getLogger('RequiredServices')
 
     this.#bindContextServices(requiredServices)
 
@@ -30,13 +33,13 @@ export default class RequiredServices {
   #bindContextServices (requiredServices) {
     // create shortcut of services by MFEApp.require() or MFEService.require()
     if (requiredServices instanceof Array) {
-      requiredServices.forEach(({name, service}) => {
-          this.#serviceCache[name] = service
-          Object.defineProperty(this, name, {
-            get () {
-              return this.#serviceCache[name]
-            }
-          })
+      requiredServices.forEach(({ name, service }) => {
+        this.#serviceCache[name] = service
+        Object.defineProperty(this, name, {
+          get () {
+            return this.#serviceCache[name]
+          }
+        })
       })
     }
   }
@@ -51,7 +54,7 @@ export default class RequiredServices {
 
     if (!service) {
       if (this.#targetName) {
-        console.warn(`Service '${name}' is not available under MFEApp/MFEService '${this.#targetName}'`)
+        this.#logger.warn(`Service '${name}' is not available under MFEApp/MFEService '${this.#targetName}'`, 'SC-O-3003')
       }
       return null
     }

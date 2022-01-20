@@ -2,7 +2,7 @@ const dummyConfigManagerData = {
   state: {},
   config: {
     org: {
-    product: 'New UI'
+      product: 'New UI'
     },
     env: 'Dev',
     routerPath: 'mfe',
@@ -315,63 +315,73 @@ const dummyConfigManagerData = {
     }
   },
   services: {
-    message_service: {
-      serviceName: 'message_service',
+    // dummy services
+    d1: {
+      serviceName: 'd1',
       type: 'SYSTEM',
       disabled: false,
       protected: true,
       options: {}
     },
-    style_service: {
-      serviceName: 'style_service',
+    d2: {
+      serviceName: 'd2',
       type: 'SYSTEM',
       disabled: false,
       protected: true,
       options: {}
     },
-    router_service: {
-      serviceName: 'router_service',
-      type: 'CUSTOMIZED',
-      options: {
-        adaptor: 'HistoryV4'
-      }
-    },
-    dummy_wcl_service: {
-      serviceName: 'dummy_wcl_service',
-      type: 'LIB',
-      libName: 'ws_credit_and_lending',
-      libUrl: 'https://hsbcnet-demo-dev.gcp.cloud.hk.hsbc/mfe/wcl/v2/remoteEntry.js',
-      autoLoad: false,
+    c1: {
+      serviceName: 'c1',
+      type: 'SYSTEM',
       disabled: false,
       protected: true,
       options: {}
     },
-    dummy_financial_service: {
-      serviceName: 'dummy_financial_service',
-      type: 'LIB',
-      libName: 'dummy_lib_services',
-      libUrl: 'https://hsbcnet-demo-dev.gcp.cloud.hk.hsbc/mfe/dummy_services/v1/remoteEntry.js',
-      autoLoad: false,
+    c2: {
+      serviceName: 'c2',
+      type: 'SYSTEM',
       disabled: false,
       protected: true,
       options: {}
     },
-    dummy_task_service: {
-      serviceName: 'dummy_task_service',
-      type: 'LIB',
-      libName: 'dummy_lib_services',
-      libUrl: 'https://hsbcnet-demo-dev.gcp.cloud.hk.hsbc/mfe/dummy_services/v1/remoteEntry.js',
-      autoLoad: false,
+    b1: {
+      serviceName: 'b1',
+      type: 'SYSTEM',
       disabled: false,
       protected: true,
       options: {}
     },
-    dummy_weather_service: {
-      serviceName: 'dummy_weather_service',
-      type: 'LIB',
-      libName: 'dummy_lib_services',
-      libUrl: 'https://hsbcnet-demo-dev.gcp.cloud.hk.hsbc/mfe/dummy_services/v1/remoteEntry.js',
-      autoLoad: false,
+    b2: {
+      serviceName: 'b2',
+      type: 'SYSTEM',
+      disabled: false,
+      protected: true,
+      options: {}
+    },
+    b3: {
+      serviceName: 'b3',
+      type: 'SYSTEM',
+      disabled: false,
+      protected: true,
+      options: {}
+    },
+    circular_b4: {
+      serviceName: 'circular_b4',
+      type: 'SYSTEM',
+      disabled: false,
+      protected: true,
+      options: {}
+    },
+    a1: {
+      serviceName: 'a1',
+      type: 'SYSTEM',
+      disabled: false,
+      protected: true,
+      options: {}
+    },
+    a2: {
+      serviceName: 'a2',
+      type: 'SYSTEM',
       disabled: false,
       protected: true,
       options: {}
@@ -392,10 +402,7 @@ const mock = {
 
   getGlobalOptions: () => dummyConfigManagerData.config.globalOptions,
 
-  getServiceConfig: () => {
-    console.log('local mocked here->')
-    return dummyConfigManagerData.services
-  },
+  getServiceConfig: () => dummyConfigManagerData.services,
 
   // Methods to be correctly mocked
   setGlobalOptions: () => {},

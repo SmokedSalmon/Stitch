@@ -11,15 +11,10 @@ let instance;
 let spyGetApp;
 let spyMount;
 let spyUnmount;
-let spyInit;
 
 const domMount = {
   test: "this is a dom",
 };
-const mockHost = {
-  test: "this is hostContext",
-};
-
 
 describe("renderApp", () => {
   beforeEach(() => {
@@ -27,7 +22,6 @@ describe("renderApp", () => {
     
     stepTrackArray = [];
     instance = {
-      init: (hostContext) => stepTrackArray.push(hostContext),
       mount: (dom) => stepTrackArray.push(dom),
       unmount: (dom) => stepTrackArray.push(dom),
       require: () => [],
@@ -36,16 +30,10 @@ describe("renderApp", () => {
     spyGetApp = jest.spyOn(appManager, "getApp");
 
     spyMount = jest.spyOn(instance, "mount");
-    spyInit = jest.spyOn(instance, "init");
     spyUnmount = jest.spyOn(instance, "unmount");
 
     spyGetApp.mockReturnValue(
-      new Promise((re)=> re({
-        config: {},
-        instance,
-        state: APP_STATUS.Inactive,
-        hostContext: mockHost,
-      }))
+      new Promise((re)=> re(instance))
     );
   })
   
@@ -53,50 +41,50 @@ describe("renderApp", () => {
     stepTrackArray = [];
     spyGetApp.mockRestore();
     spyMount.mockRestore();
-    spyInit.mockRestore();
   })
 
-  it("renderApp for app with Inactive status in base flow", () => {
+  it("renderApp for app with Inactive status in base flow", async () => {
     
-    return render.renderApp(domMount, "test").then((item) => {
-      expect(stepTrackArray[0]).toEqual(mockHost);
-      expect(stepTrackArray[1]).toEqual(domMount);
-      expect(spyMount).toHaveBeenCalledTimes(1);
-      expect(spyInit).toHaveBeenCalledTimes(1);
-     
-    });
+    const item = await render.renderApp(domMount, "test");
+    expect(stepTrackArray[0]).toEqual(domMount);
+    expect(spyMount).toHaveBeenCalledTimes(1);
   });
 
-  // expect init only will be trigger when app state is !== Initialized
-  it("renderApp for app with Initialized status in base flow", () => {
-    spyGetApp.mockReturnValue(
-      new Promise((re)=> re({
-        config: {},
-        instance,
-        state: APP_STATUS.Initialized,
-        hostContext: mockHost,
-      }))
-    );
-
-    return render.renderApp(domMount, "test").then((item) => {
-      expect(stepTrackArray[0]).toEqual(domMount);
-      expect(spyMount).toHaveBeenCalledTimes(1);
-      expect(spyInit).toHaveBeenCalledTimes(0);
-
-    });
-  });
-  
-
-  it("cleanApp base flow ", () => {
-    return render.cleanApp(domMount, "test").then((item) => {
-      expect(stepTrackArray[0]).toEqual(domMount);
-      expect(spyUnmount).toHaveBeenCalledTimes(1);
-    });
+  it("cleanApp base flow ", async () => {
+    await render.cleanApp(domMount, "test");
+    expect(stepTrackArray[0]).toEqual(domMount);
+    expect(spyUnmount).toHaveBeenCalledTimes(1);
   });
 
   // exception flow
-  it("renderApp with exceptional flow ??", () => {
-    // TODO
+  it("renderApp with exceptional flow", async () => {
+    // missing wrong 
+    instance = {
+      require: () => [],
+    };
+    spyGetApp.mockReturnValue(
+      new Promise((re)=> re(instance))
+    );
+    await render.renderApp(domMount, "test");
+    expect(stepTrackArray).toEqual([]);
+    // we expect app status will be changed
+    const data = appManager.getState('test');
+    expect(data).toEqual(APP_STATUS.RunError);
+  });
+
+  it("cleanApp with exceptional flow", async () => {
+    // missing wrong 
+    instance = {
+      require: () => [],
+    };
+    spyGetApp.mockReturnValue(
+      new Promise((re)=> re(instance))
+    );
+    await render.cleanApp(domMount, "test");
+    expect(stepTrackArray).toEqual([]);
+    // we expect app status will be changed
+    const data = appManager.getState('test');
+    expect(data).toEqual(APP_STATUS.RunError);
   });
   
 });

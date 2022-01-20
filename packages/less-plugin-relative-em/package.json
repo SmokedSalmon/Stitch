@@ -7,7 +7,7 @@
     "dist/"
   ],
   "scripts": {
-    "prebuild": "rm -rf dist",
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
     "lint": "eslint \"src/**/*.js\"",
     "test": "echo \"Error: no test specified\" && exit 0;",

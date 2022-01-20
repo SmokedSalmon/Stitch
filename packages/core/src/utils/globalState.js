@@ -1,12 +1,10 @@
 class GlobalState {
-  #configEnv
-  #stitchStart
+  #configEnv // default value depends on the schema
+  #stitchStart = false
+  #configReady = false
   #history
 
   constructor () {
-    // this.#configEnv = 'Prod' // default value depends on the schema
-    this.#stitchStart = false
-
     Object.freeze(this)
   }
 
@@ -28,6 +26,14 @@ class GlobalState {
 
   set stitchStart (value) {
     this.#stitchStart = !!value
+  }
+
+  get configReady () {
+    return this.#configReady
+  }
+
+  set configReady (value) {
+    this.#configReady = !!value
   }
 
   get history () {

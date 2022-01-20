@@ -1,6 +1,6 @@
 {
   "name": "@stitch/types",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.3",
   "description": "Stitch types",
   "main": "dist/index.js",
   "module": "dist/index.es.js",

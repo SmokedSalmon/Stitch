@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useLayoutEffect, useRef } from 'react'
 import { kebabCase } from 'lodash'
 
 import { renderApp, cleanApp } from '@stitch/core'
@@ -7,12 +7,21 @@ const AppHost = (props) => {
   const [hostID, setHostID] = useState('')
   const { appName = '' } = props
   const hostElement = useRef(null)
-  useEffect(() => {
-    setHostID(`hsbc-mfe-host-${kebabCase(appName)}`)
-    // renderApp is direct DOM change NOT via react
-    hostElement.current && renderApp(hostElement.current, appName)
+
+  useLayoutEffect(() => {
+    const currentHostID = `hsbc-mfe-host-${kebabCase(appName)}`
+
+    setHostID(currentHostID)
+
+    if (hostID === currentHostID && hostElement.current) {
+      // renderApp is direct DOM change NOT via react
+      renderApp(hostElement.current, appName)
+    }
+
     return () => {
-      hostElement.current && cleanApp(hostElement.current, appName)
+      if (hostID === currentHostID && hostElement.current) {
+        cleanApp(hostElement.current, appName)
+      }
     }
   }, [appName, hostID])
 

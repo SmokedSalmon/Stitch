@@ -4,4 +4,4 @@ export { default as Config } from './Config'
 
 export { default as RequiredServices } from './RequiredServices'
 
-export { createHostContext } from './HostContextFactory'
+export { default as createHostContext } from './createHostContext'

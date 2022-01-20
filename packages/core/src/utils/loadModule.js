@@ -53,4 +53,24 @@ const loadModule = (() => {
   }
 })()
 
+export function loadScriptAsync (url, libName, name) {
+  return new Promise((resolve, reject) => {
+    if (typeof window[libName] !== 'undefined') return resolve()
+
+    const done = (event) => {
+      if (typeof window[libName] !== 'undefined') return resolve()
+      const errorType = event && (event.type === 'load' ? 'missing' : event.type)
+      const realSrc = event && event.target && event.target.src
+      const error = {}
+      error.message = 'Loading script failed.\n(' + errorType + ': ' + realSrc + ')'
+      error.name = 'ScriptExternalLoadError'
+      error.type = errorType
+      error.request = realSrc
+      reject(error)
+    }
+
+    return loadModule(url, done, name)
+  })
+}
+
 export default loadModule

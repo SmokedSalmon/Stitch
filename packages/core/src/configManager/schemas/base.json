@@ -5,7 +5,7 @@
     "org": {
       "type": "object",
       "properties": {
-        "product": {
+        "Product": {
           "description": "Product or channel name",
           "type": "string"
         },
@@ -18,7 +18,7 @@
           "type": "string"
         }
       },
-      "required": ["product"]
+      "required": ["Product"]
     },
     "env": {
       "type": "string",

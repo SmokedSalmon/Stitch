@@ -1,35 +1,24 @@
-import { uniqueId } from 'lodash'
+import { uniqueId, cloneDeep } from 'lodash'
 
 import * as schemas from './schemas'
 import getValidate from './validate'
 import { SERVICE_TYPE_SYSTEM, SERVICE_TYPE_LIB, SERVICE_TYPE_CUSTOMIZED } from '../serviceManager/constants'
-import { globalState } from '../utils'
-import { MESSAGE_SERVICE, STYLE_SERVICE } from '../constants'
+import { systemServiceConfigs } from '../services/constants'
+import { globalState, log } from '../utils'
 
 /** @type {function: ValidateFunction} */
-const validate = getValidate(schemas.base)
+export const validate = getValidate(schemas.base)
 
 const STITCH_MFE_STYLE_PREFIX = 'stitch_mfe_style'
 
-const defaultSystemServicesConfig = [
-  {
-    serviceName: MESSAGE_SERVICE,
-    disabled: false,
-    protected: true
-  },
-  {
-    serviceName: STYLE_SERVICE,
-    disabled: false,
-    protected: true
-  }
-]
-
 class ConfigManager {
-  #state
+  #logger = log.getLogger('ConfigManager')
+  #state = {}
   #config
   #hosts
-  #styles
-  #apps
+  #styles = {}
+  #apps = {}
+  #routerNames = []
   #libs
   #services
 
@@ -42,30 +31,26 @@ class ConfigManager {
     // generate #hosts url list from raw config.hosts config list
     this.#hosts = (config.hosts || []).reduce((hosts, item) => {
       const {
-        hostName,
+        name,
         protocol,
         server,
         port,
         publicPath
       } = item
 
-      if (hosts[hostName]) {
-        throw new Error(`Duplicate definition of hostName (${hostName}) in config.hosts`)
+      if (hosts[name]) {
+        throw new TypeError(`Duplicate definition of 'name' (${name}) in config.hosts`)
       }
 
       return {
         ...hosts,
-        [hostName]: `${protocol}://${server}${port ? `:${port}` : ''}${publicPath}`
+        [name]: `${protocol}://${server}${port ? `:${port}` : ''}${publicPath}`
       }
     }, {})
 
-    this.#styles = {}
-
-    this.#apps = {}
-
-    this.#libs = config.libs.reduce((libs, item) => {
+    this.#libs = (config.libs || []).reduce((libs, item) => {
       const {
-        libName,
+        name: libName,
         hostName,
         resource,
         styles = [],
@@ -74,13 +59,13 @@ class ConfigManager {
       } = item
 
       if (libs[libName]) {
-        throw new Error(`Duplicate definition of libName (${libName}) in config.libs`)
+        throw new TypeError(`Duplicate definition of 'name' (${libName}) in config.libs`)
       }
 
       let libUrl = resource
       if (hostName && !/^(?:https?:\/\/|\/\/)/.test(resource)) {
         if (!this.#hosts[hostName]) {
-          throw new Error(`Missing host definition of hostName (${hostName}) in config.hosts for getting libUrl by relative path of libs resource (${libName})`)
+          throw new TypeError(`Missing host definition of 'name' (${hostName}) in config.hosts for getting libUrl by relative path of libs resource (${libName})`)
         }
 
         libUrl = `${this.#hosts[hostName]}${resource}`
@@ -89,7 +74,7 @@ class ConfigManager {
       const libStyles = {}
       styles.forEach(libStyleItem => {
         const {
-          styleName,
+          name: styleName,
           hostName: styleHostName = hostName,
           resource: styleResource,
           autoLoad
@@ -98,7 +83,7 @@ class ConfigManager {
         let styleUrl = styleResource
         if (styleHostName && !/^(?:https?:\/\/|\/\/)/.test(styleResource)) {
           if (!this.#hosts[styleHostName]) {
-            throw new Error(`Missing host definition of hostName (${styleHostName}) in config.hosts for getting styleUrl by relative path of libs.styles resource (${libName})`)
+            throw new TypeError(`Missing host definition of 'name' (${styleHostName}) in config.hosts for getting styleUrl by relative path of libs.styles resource (${libName})`)
           }
 
           styleUrl = `${this.#hosts[styleHostName]}${styleResource}`
@@ -107,23 +92,23 @@ class ConfigManager {
         const uniqueID = uniqueId(STITCH_MFE_STYLE_PREFIX + '_')
 
         /**
-         * @typedef {object} StyleConfig
+         * @typedef {object} ManagedStyleConfig
          * @property {string} uniqueID
-         * @property {string} styleName
+         * @property {string} name
          * @property {string} libName
          * @property {string} styleUrl
          * @property {boolean} autoLoad
          */
         const libStyleConfig = {
           uniqueID,
-          styleName,
+          name: styleName,
           libName,
           styleUrl,
           autoLoad
         }
 
         if (libStyles[styleName]) {
-          throw new Error(`Duplicate definition of styles.styleName (${styleName}) in config.libs (${libName})`)
+          throw new TypeError(`Duplicate definition of styles.name (${styleName}) in config.libs (${libName})`)
         }
 
         libStyles[styleName] = libStyleConfig
@@ -139,14 +124,14 @@ class ConfigManager {
         const {
           name,
           mode,
-          routerName = name,
+          routerName,
           options = {},
           styles: appStyles = []
         } = libAppItem
 
         const validAppStyles = appStyles.reduce((results, styleName) => {
           if (!libStyles[styleName]) {
-            throw new Error(`Missing styleName of style (${styleName}) in config.libs (${libName})`)
+            throw new TypeError(`Missing the definition of style (name: ${styleName}) in config.libs (${libName})`)
           }
 
           return [
@@ -156,13 +141,13 @@ class ConfigManager {
         }, [])
 
         /**
-         * @typedef {object} AppConfig
+         * @typedef {object} ManagedAppConfig
          * @property {string} name
          * @property {string} libName
          * @property {string} libUrl
          * @property {string} mode
-         * @property {string} routerName
-         * @property {Array.<StyleConfig>} styles
+         * @property {string[]} routerName
+         * @property {Array.<ManagedStyleConfig>} styles
          * @property {object} [options]
          */
         const libAppConfig = {
@@ -175,17 +160,28 @@ class ConfigManager {
           options
         }
 
-        const appName = routerName || name
-
-        if (this.#apps[appName]) {
-          throw new Error(`Duplicate definition of apps.name or apps.routerName (${appName}) in config.libs`)
+        if (this.#apps[name]) {
+          throw new TypeError(`Duplicate definition of apps.name (${name}) in config.libs`)
         }
 
-        this.#apps[appName] = libAppConfig
+        // set the routerName to the app's name by default
+        if (routerName.length === 0) {
+          routerName.push(name)
+        }
+
+        routerName.forEach((item, index) => {
+          if (this.#routerNames.includes(item)) {
+            throw new TypeError(`Duplicate definition of apps.routerName[${index}] (${item}) in config.libs (appName: '${name}')`)
+          }
+
+          this.#routerNames.push(item)
+        })
+
+        this.#apps[name] = libAppConfig
 
         return {
           ...libApps,
-          [appName]: libAppConfig
+          [name]: libAppConfig
         }
       }, {})
 
@@ -201,22 +197,22 @@ class ConfigManager {
       }
     }, {})
 
-    const defaultSystemServices = defaultSystemServicesConfig.reduce((services, item) => [...services, item.serviceName], [])
+    const defaultSystemServices = systemServiceConfigs.reduce((services, item) => [...services, item.name], [])
 
     // generate #services config set from raw config.services config list
-    this.#services = defaultSystemServicesConfig
+    this.#services = systemServiceConfigs
       .reduce((services, item) => [
         ...services,
         {
           ...item,
           type: SERVICE_TYPE_SYSTEM,
-          ...(config.services || []).find(({ serviceName }) => serviceName === item.serviceName)
+          ...(config.services || []).find(({ name }) => name === item.name)
         }
       ], [])
-      .concat((config.services || []).filter(({ serviceName }) => !defaultSystemServices.includes(serviceName)))
+      .concat((config.services || []).filter(({ name }) => !defaultSystemServices.includes(name)))
       .reduce((services, item) => {
         const {
-          serviceName,
+          name: serviceName,
           type = SERVICE_TYPE_CUSTOMIZED,
           disabled,
           protected: isProtected, // avoid `'protected' is reserved syntax error`
@@ -224,14 +220,14 @@ class ConfigManager {
         } = item
 
         if (services[serviceName]) {
-          throw new Error(`Duplicate definition of serviceName (${serviceName}) in config.services`)
+          throw new TypeError(`Duplicate definition of 'name' (${serviceName}) in config.services`)
         }
 
         return {
           ...services,
           /**
-         * @typedef {Object} ServiceConfig
-         * @property {string} serviceName
+         * @typedef {Object} ManagedServiceConfig
+         * @property {string} name
          * @property {string} type
          * @property {string} [libName]
          * @property {string} [libUrl]
@@ -241,7 +237,7 @@ class ConfigManager {
          * @property {object} [options]
          */
           [serviceName]: {
-            serviceName,
+            name: serviceName,
             type,
             disabled,
             protected: isProtected,
@@ -254,17 +250,21 @@ class ConfigManager {
     Object.keys(this.#libs).forEach((libName) => {
       this.#libs[libName].services = this.#libs[libName].services.reduce((services, item) => {
         const {
-          serviceName,
+          name: serviceName,
           autoLoad,
           disabled,
           protected: isProtected, // avoid `'protected' is reserved syntax error`
           options = {}
         } = item
 
+        if (services[serviceName]) {
+          throw new TypeError(`Duplicate definition of 'name' (${serviceName}) in 'services' item of config.libs (${libName})`)
+        }
+
         // generate #services config set from raw config.libs.services config list
-        /** @type {ServiceConfig} */
+        /** @type {ManagedServiceConfig} */
         this.#services[serviceName] = {
-          serviceName,
+          name: serviceName,
           type: SERVICE_TYPE_LIB,
           libName,
           libUrl: this.#libs[libName].libUrl,
@@ -311,39 +311,57 @@ class ConfigManager {
    */
   setGlobalOptions (options = {}) {
     if (this.#state.stitchStart) {
-      throw new Error('The Stitch has been started, can not set global config options anymore.')
+      this.#logger.error('The Stitch has been started, can not set global config options anymore.', 'CM-B-4001')
+      return
     }
 
     this.#config.globalOptions = options
   }
 
+  /**
+   * @param {object} config - the input config object can NOT be immutable
+   * @return {boolean}
+   * @affect will add some properties with default value by schemas
+   */
   validateConfig (config) {
-    const valid = validate(config)
+    let valid = false
 
-    if (!valid) {
-      const {
-        instancePath,
-        message
-      } = validate.errors[0]
-      throw new Error(`Config validate failed: ${instancePath} ${message}`)
+    try {
+      valid = validate(config)
+    } catch (validError) {
+      this.#logger.fatal(validError, 'CM-P-5001')
+      throw validError
     }
 
     return valid
   }
 
   updateConfig (config) {
-    if (this.validateConfig(config)) {
-      this.#convertConfig(config)
+    if (this.#state.stitchStart) {
+      this.#logger.error('The Stitch has been started, can not update config anymore.', 'CM-B-4002')
+      return
+    }
+
+    const mutableConfig = cloneDeep(config)
+
+    if (this.validateConfig(mutableConfig)) {
+      try {
+        this.#convertConfig(mutableConfig)
+      } catch (convertError) {
+        this.#logger.fatal(convertError, 'CM-P-5002')
+        throw convertError
+      }
     }
   }
 
   /**
    * @param {string} appName
-   * @param {Object.<AppConfig.options>} options
+   * @param {Object.<ManagedAppConfig.options>} options
    */
   setAppOptions (appName, options = {}) {
     if (this.#state.stitchStart) {
-      throw new Error('The Stitch has been started, can not set app config options anymore.')
+      this.#logger.error('The Stitch has been started, can not set app config options anymore.', 'CM-B-4003')
+      return
     }
 
     this.#apps[appName].options = options
@@ -351,7 +369,7 @@ class ConfigManager {
 
   /**
    * @param {string} [appName]
-   * @return {AppConfig | Object.<string, AppConfig>}
+   * @return {ManagedAppConfig | Object.<string, ManagedAppConfig>}
    */
   getAppConfig (appName) {
     if (appName) {
@@ -362,20 +380,37 @@ class ConfigManager {
   }
 
   /**
+   * @param {string} routerName
+   * @return {string}
+   */
+  getAppName (routerName) {
+    if (routerName) {
+      return Object.keys(this.#apps).find((appName) => this.#apps[appName].routerName.includes(routerName)) || ''
+    }
+
+    return ''
+  }
+
+  /**
    * @param {string} serviceName
-   * @param {Object.<ServiceConfig.options>} options
+   * @param {Object.<ManagedServiceConfig.options>} options
    */
   setServiceOptions (serviceName, options = {}) {
     if (this.#state.stitchStart) {
-      throw new Error('The Stitch has been started, can not set service config options anymore.')
+      this.#logger.error('The Stitch has been started, can not set service config options anymore.', 'CM-B-4004')
+      return
     }
 
-    this.#services[serviceName].options = options
+    // we should merge the option instead of overwrite it
+    this.#services[serviceName].options = {
+      ...this.#services[serviceName].options,
+      ...options
+    }
   }
 
   /**
    * @param {string} [serviceName]
-   * @return {ServiceConfig | Object.<string, ServiceConfig>}
+   * @return {ManagedServiceConfig | Object.<string, ManagedServiceConfig>}
    */
   getServiceConfig (serviceName) {
     if (serviceName) {
@@ -388,7 +423,7 @@ class ConfigManager {
   /**
    * @param {string} libName - when passed as value of style config uniqueID, will return the matched style config directly
    * @param {string} [styleName]
-   * @return {Array.<StyleConfig>}
+   * @return {Array.<ManagedStyleConfig>}
    */
   getStyleConfig (libName, styleName) {
     // first parameter as uniqueID

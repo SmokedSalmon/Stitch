@@ -18,8 +18,8 @@ NOTE: @stitch/* only be released in the following internal nexus registries:
 - [Introduction](/docs/1.Introduction.md)
 - Getting Started
   - [Installation](/docs/2.Getting_Started/2.1.Installation.md)
-  - [Configuration](/docs/2.Getting_Started/2.2.Configuration.md)
-  - [Integration](/docs/2.Getting_Started/2.3.Integration.md)
+  - [Create your MFA](/docs/2.Getting_Started/2.2.Create_your_MFA.md)
+  - [Start your project with Stitch](/docs/2.Getting_Started/2.3.Start_your_project_with_Stitch.md)
 - [Config Schema](/docs/3.Config_Schema.md)
 - [API Reference](/docs/4.API.md)
 - MFE App
@@ -34,8 +34,12 @@ NOTE: @stitch/* only be released in the following internal nexus registries:
 - Best Practices
   - [Shared Dependencies](/docs/7.Best_Practice/7.1.Shared_Dependencies.md)
   - [Styling](/docs/7.Best_Practice/7.2.Styling.md)
-  - [Routing Example](/docs/7.Best_Practice/7.3.Routing_Example.md)
-
+  - [Routing Example](/docs/7.Best_Practice/7.3.RoutingForMicroFrontendApps_Example.md)
+  - [Routing entitlement check](/docs/7.Best_Practice/7.4.Routing_Entitlement_Check.md)
+  - [How to used HostContext](/docs/7.Best_Practice/7.5.How_to_used_HostContext.md)
+  - [MFA Deployment](/docs/7.Best_Practice/7.6.MFA_Deployment.md)
+  - [Version control and CDN](/docs/7.Best_Practice/7.7.Version_Control_And_CDN.md)
+  - [Backup solution when CDN fails](/docs/7.Best_Practice/7.8.Backup_Solution_When_Cdn_Fails.md)
 ## Developer guide
 
 Use `yarn` to start monorepo.

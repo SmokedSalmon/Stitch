@@ -1,0 +1,318 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfigManager getAppConfig 1`] = `
+Object {
+  "libName": "mockedLib",
+  "libUrl": "https://localhost:3002/mocked-path/mocked-resource/remoteEntry.js",
+  "mode": "Web",
+  "name": "mockedApp",
+  "options": Object {},
+  "routerName": Array [
+    "mockedRouterName",
+  ],
+  "styles": Array [
+    Object {
+      "autoLoad": true,
+      "libName": "mockedLib",
+      "name": "mockedStyle",
+      "styleUrl": "https://localhost:3002/mocked-path/mocked-resource/style.css",
+      "uniqueID": "stitch_mfe_style_1",
+    },
+  ],
+}
+`;
+
+exports[`ConfigManager getAppConfig 2`] = `
+Object {
+  "mockedApp": Object {
+    "libName": "mockedLib",
+    "libUrl": "https://localhost:3002/mocked-path/mocked-resource/remoteEntry.js",
+    "mode": "Web",
+    "name": "mockedApp",
+    "options": Object {},
+    "routerName": Array [
+      "mockedRouterName",
+    ],
+    "styles": Array [
+      Object {
+        "autoLoad": true,
+        "libName": "mockedLib",
+        "name": "mockedStyle",
+        "styleUrl": "https://localhost:3002/mocked-path/mocked-resource/style.css",
+        "uniqueID": "stitch_mfe_style_1",
+      },
+    ],
+  },
+  "mockedAppWithEmptyRouterName": Object {
+    "libName": "mockedLib",
+    "libUrl": "https://localhost:3002/mocked-path/mocked-resource/remoteEntry.js",
+    "mode": undefined,
+    "name": "mockedAppWithEmptyRouterName",
+    "options": Object {},
+    "routerName": Array [
+      "mockedAppWithEmptyRouterName",
+    ],
+    "styles": Array [],
+  },
+}
+`;
+
+exports[`ConfigManager getRawConfig 1`] = `
+Object {
+  "env": "Dev",
+  "globalOptions": Object {
+    "mockedOptionKey": "mockedOptionValue",
+  },
+  "hosts": Array [
+    Object {
+      "name": "mockedHost",
+      "port": 3002,
+      "protocol": "https",
+      "publicPath": "/mocked-path",
+      "server": "localhost",
+    },
+    Object {
+      "name": "mockedHostWithoutPort",
+      "protocol": "https",
+      "publicPath": "/mocked-path",
+      "server": "localhost",
+    },
+  ],
+  "libs": Array [
+    Object {
+      "apps": Array [
+        Object {
+          "mode": "Web",
+          "name": "mockedApp",
+          "options": Object {},
+          "routerName": Array [
+            "mockedRouterName",
+          ],
+          "styles": Array [
+            "mockedStyle",
+          ],
+        },
+        Object {
+          "name": "mockedAppWithEmptyRouterName",
+          "routerName": Array [
+            "mockedAppWithEmptyRouterName",
+          ],
+        },
+      ],
+      "hostName": "mockedHost",
+      "name": "mockedLib",
+      "resource": "/mocked-resource/remoteEntry.js",
+      "services": Array [
+        Object {
+          "autoLoad": true,
+          "disabled": false,
+          "name": "mockedLibService",
+          "options": Object {},
+          "protected": true,
+        },
+      ],
+      "styles": Array [
+        Object {
+          "autoLoad": true,
+          "hostName": "mockedHost",
+          "name": "mockedStyle",
+          "resource": "/mocked-resource/style.css",
+        },
+      ],
+    },
+  ],
+  "org": Object {
+    "EIM": "mockedEIM",
+    "GBGF": "mockedGBGF",
+    "Product": "mockedChannel",
+  },
+  "routerPath": "mockedRouterPath",
+  "services": Array [
+    Object {
+      "disabled": false,
+      "name": "mockedService",
+      "options": Object {},
+      "protected": true,
+    },
+  ],
+}
+`;
+
+exports[`ConfigManager getServiceConfig 1`] = `
+Object {
+  "disabled": false,
+  "name": "mockedService",
+  "options": Object {},
+  "protected": true,
+  "type": "CUSTOMIZED",
+}
+`;
+
+exports[`ConfigManager getServiceConfig 2`] = `
+Object {
+  "autoLoad": true,
+  "disabled": false,
+  "libName": "mockedLib",
+  "libUrl": "https://localhost:3002/mocked-path/mocked-resource/remoteEntry.js",
+  "name": "mockedLibService",
+  "options": Object {},
+  "protected": true,
+  "type": "LIB",
+}
+`;
+
+exports[`ConfigManager getServiceConfig 3`] = `
+Object {
+  "a1": Object {
+    "disabled": false,
+    "name": "a1",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "a2": Object {
+    "disabled": false,
+    "name": "a2",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "b1": Object {
+    "disabled": false,
+    "name": "b1",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "b2": Object {
+    "disabled": false,
+    "name": "b2",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "b3": Object {
+    "disabled": false,
+    "name": "b3",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "c1": Object {
+    "disabled": false,
+    "name": "c1",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "c2": Object {
+    "disabled": false,
+    "name": "c2",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "circular_b4": Object {
+    "disabled": false,
+    "name": "circular_b4",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "d1": Object {
+    "disabled": false,
+    "name": "d1",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "d2": Object {
+    "disabled": false,
+    "name": "d2",
+    "options": Object {},
+    "protected": true,
+    "type": "SYSTEM",
+  },
+  "mockedLibService": Object {
+    "autoLoad": true,
+    "disabled": false,
+    "libName": "mockedLib",
+    "libUrl": "https://localhost:3002/mocked-path/mocked-resource/remoteEntry.js",
+    "name": "mockedLibService",
+    "options": Object {},
+    "protected": true,
+    "type": "LIB",
+  },
+  "mockedService": Object {
+    "disabled": false,
+    "name": "mockedService",
+    "options": Object {},
+    "protected": true,
+    "type": "CUSTOMIZED",
+  },
+}
+`;
+
+exports[`ConfigManager getStyleConfig 1`] = `
+Array [
+  Object {
+    "autoLoad": true,
+    "libName": "mockedLib",
+    "name": "mockedStyle",
+    "styleUrl": "https://localhost:3002/mocked-path/mocked-resource/style.css",
+    "uniqueID": "stitch_mfe_style_1",
+  },
+]
+`;
+
+exports[`ConfigManager getStyleConfig 2`] = `
+Array [
+  Object {
+    "autoLoad": true,
+    "libName": "mockedLib",
+    "name": "mockedStyle",
+    "styleUrl": "https://localhost:3002/mocked-path/mocked-resource/style.css",
+    "uniqueID": "stitch_mfe_style_1",
+  },
+]
+`;
+
+exports[`ConfigManager getStyleConfig 3`] = `
+Array [
+  Object {
+    "autoLoad": true,
+    "libName": "mockedLib",
+    "name": "mockedStyle",
+    "styleUrl": "https://localhost:3002/mocked-path/mocked-resource/style.css",
+    "uniqueID": "stitch_mfe_style_1",
+  },
+]
+`;
+
+exports[`ConfigManager when globalState stitchStart = true setAppOptions 1`] = `"The Stitch has been started, can not set app config options anymore."`;
+
+exports[`ConfigManager when globalState stitchStart = true setGlobalOptions 1`] = `"The Stitch has been started, can not set global config options anymore."`;
+
+exports[`ConfigManager when globalState stitchStart = true setServiceOptions 1`] = `"The Stitch has been started, can not set service config options anymore."`;
+
+exports[`ConfigManager when globalState stitchStart = true updateConfig 1`] = `"The Stitch has been started, can not update config anymore."`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed duplicate "name" of "apps" item 1`] = `[TypeError: Duplicate definition of apps.name (mockedApp) in config.libs]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed duplicate "name" of "hosts" item 1`] = `[TypeError: Duplicate definition of 'name' (mockedHost) in config.hosts]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed duplicate "name" of "libs" item 1`] = `[TypeError: Duplicate definition of 'name' (mockedLib) in config.libs]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed duplicate "name" of "services" item 1`] = `[TypeError: Duplicate definition of 'name' (mockedService) in config.services]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed duplicate "name" of "services" item of "libs" item 1`] = `[TypeError: Duplicate definition of 'name' (mockedLibService) in 'services' item of config.libs (mockedLib)]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed duplicate "name" of "styles" item 1`] = `[TypeError: Duplicate definition of styles.name (mockedStyle) in config.libs (mockedLib)]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed duplicate "routerName" of "apps" item 1`] = `[TypeError: Duplicate definition of apps.routerName[0] (mockedRouterName) in config.libs (appName: 'mockedApp2')]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed missing "hosts" item definition for "libs" item 1`] = `[TypeError: Missing host definition of 'name' (mockedHost) in config.hosts for getting libUrl by relative path of libs resource (mockedLib)]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed missing "styles" item definition for "apps" item 1`] = `[TypeError: Missing the definition of style (name: wrongStyleName) in config.libs (mockedLib)]`;
+
+exports[`ConfigManager.updateConfig #convertConfig failed missing the matched "hosts" item 1`] = `[TypeError: Missing host definition of 'name' (wrongHostName) in config.hosts for getting styleUrl by relative path of libs.styles resource (mockedLib)]`;

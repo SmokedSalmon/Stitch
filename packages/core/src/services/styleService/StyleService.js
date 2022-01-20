@@ -1,6 +1,7 @@
 import { MFEService } from '@stitch/types'
 
 import StyleServiceClient from './StyleServiceClient'
+import { log } from '../../utils'
 
 const styleInjectionDom = window.document.head
 
@@ -33,41 +34,69 @@ const getInjectedStyle = (uniqueID) => styleInjectionDom.querySelector(`link[dat
 const referenceCount = {}
 
 const loadStyleById = (uniqueID, href, { styleAttrs } = {}) => {
+  const logger = log.getLogger('loadStyleById')
+
   if (getInjectedStyle(uniqueID)) {
-    return Promise.reject(new Error(`The style (link[data-unique-id="${uniqueID}"]) has been injected`))
+    const styleInjectError = new Error(`The style (link[data-unique-id="${uniqueID}"]) has been injected`)
+
+    logger.error(styleInjectError, 'SS-O-4001')
+
+    return Promise.reject(styleInjectError)
   }
 
   return new Promise((resolve, reject) => {
-    styleInjectionDom.appendChild(createLinkElement({
-      'data-unique-id': uniqueID,
-      href,
-      ...styleAttrs,
-      onload (event) {
-        if (referenceCount[uniqueID]) {
-          referenceCount[uniqueID]++
-        } else {
-          referenceCount[uniqueID] = 1
-        }
+    try {
+      styleInjectionDom.appendChild(createLinkElement({
+        'data-unique-id': uniqueID,
+        href,
+        ...styleAttrs,
+        onload (event) {
+          if (referenceCount[uniqueID]) {
+            referenceCount[uniqueID]++
+          } else {
+            referenceCount[uniqueID] = 1
+          }
 
-        resolve({ uniqueID, event })
-      },
-      onerror () {
-        reject(new Error(`The style resource (uniqueID: ${uniqueID}) load failed`))
-      }
-    }))
+          /**
+           * @typedef {object} LoadStyleResult
+           * @property {string} uniqueID
+           * @property {object} event
+           */
+          resolve({ uniqueID, event })
+        },
+        onerror () {
+          const styleLoadError = new Error(`The style resource (uniqueID: ${uniqueID}) load failed`)
+
+          logger.error(styleLoadError, 'SS-N-4001')
+
+          reject(styleLoadError)
+        }
+      }))
+    } catch (error) {
+      logger.error(error, 'SS-O-4002')
+
+      reject(error)
+    }
   })
 }
 
 const unloadStyleById = (uniqueID) => {
+  const logger = log.getLogger('unloadStyleById')
   const style = getInjectedStyle(uniqueID)
 
   if (style && referenceCount[uniqueID] && referenceCount[uniqueID] <= 1) {
-    styleInjectionDom.removeChild(style)
-    referenceCount[uniqueID]--
+    try {
+      styleInjectionDom.removeChild(style)
+      referenceCount[uniqueID]--
+    } catch (error) {
+      logger.error(error, 'SS-O-4003')
+    }
   }
 }
 
 class StyleService extends MFEService {
+  #logger = log.getLogger('StyleService')
+
   constructor () {
     super()
     Object.freeze(this)
@@ -88,7 +117,9 @@ class StyleService extends MFEService {
       return foundStyleConfig[0].uniqueID
     }
 
-    return console.error(`Not matched style of styleName: ${styleName} of libName: ${libName}`)
+    this.#logger.error(`Not matched style of styleName: ${styleName} of libName: ${libName}`, 'SS-O-4004')
+
+    return null
   }
 
   /**
@@ -104,7 +135,7 @@ class StyleService extends MFEService {
    * @param {string} libName
    * @param {string} styleName
    * @param {object} [styleAttrs] - the html attributes of link elements
-   * @return {Promise}
+   * @return {Promise.<LoadStyleResult>}
    */
   loadStyle (libName, styleName, { styleAttrs } = {}) {
     const uniqueID = this.#getStyleUniqueID(libName, styleName)
@@ -124,7 +155,7 @@ class StyleService extends MFEService {
   /**
    * @param {string} appName
    * @param {object} [styleAttrs] - the html attributes of link elements
-   * @return {Promise.<Array>}
+   * @return {Promise.<Array.<LoadStyleResult>>}
    */
   loadAppStyles (appName, { styleAttrs } = {}) {
     const loadAppStylesPromises = []

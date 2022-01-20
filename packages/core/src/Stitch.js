@@ -1,43 +1,69 @@
 import appManager from './appManager'
 import configManager from './configManager'
-import serviceManager, { SERVICE_TYPE_LIB, SERVICE_AUTOLOAD, SERVICE_TYPE_SYSTEM } from './serviceManager'
-import { globalState } from './utils'
+import serviceManager, { SERVICE_TYPE_LIB, SERVICE_AUTOLOAD } from './serviceManager'
+import { globalState, log } from './utils'
 
 class Stitch {
   #state
+  #logger
 
   constructor () {
     this.#state = globalState
-
+    this.#logger = log.getLogger('Stitch')
     Object.freeze(this)
   }
 
-  config (config, { history }) {
-    configManager.updateConfig(config)
+  #checkStitchStarted () {
+    if (!this.#state.stitchStart) {
+      this.#logger.error('The Stitch has not started.', 'SC-P-4003')
+      return false
+    }
+    return true
+  }
 
-    if (!history) {
-      console.warn('Please provide a history instance for Stitch if you want to enable router Service.')
+  #checkConfigReady () {
+    if (!this.#state.configReady) {
+      this.#logger.error('The Stitch config has not been set.', 'SC-P-4004')
+      return false
+    }
+    return true
+  }
+
+  config (config, router) {
+    try {
+      configManager.updateConfig(config)
+    } catch (error) {
+      this.#logger.fatal(error, 'SC-P-5001')
     }
 
-    this.#state.history = history
+    this.#state.configReady = true
+
+    if (!router || !router.history) {
+      this.#logger.warn('Please provide a history instance for Stitch if you want to enable router Service.', 'SC-P-3001')
+    }
+
+    this.#state.history = router && router.history
   }
 
   start () {
     if (this.#state.stitchStart) {
-      throw new Error('The Stitch has been started.')
+      this.#logger.warn('The Stitch has been started.', 'SC-O-3002')
+      return
     }
 
     return serviceManager.getServices({ type: SERVICE_TYPE_LIB, [SERVICE_AUTOLOAD]: true })
       .then(() => {
+        // [TODO](next Sprint) move this indicator after .startAllServices().then(() => {})
         this.#state.stitchStart = true
 
         // start all prioritized/critical services
-        serviceManager.startAllServices()
-
-        return this
-      }).catch(() => {
+        return serviceManager.startAllServices()
+      }).catch((err) => {
         this.#state.stitchStart = false
-        throw new Error('The Stitch start fail.')
+        const stitchStartError = new Error('The Stitch start fail.')
+        this.#logger.fatal(stitchStartError, 'SC-O-5002')
+        this.#logger.debug(err, '')
+        throw stitchStartError
       })
   };
 
@@ -45,6 +71,8 @@ class Stitch {
    * Pupup console UI. Only take effect in dev mode.
    */
   showConsoleUI () {
+    this.#checkConfigReady()
+
     if (this.#state.devMode) {
       // TODO
     }
@@ -54,37 +82,39 @@ class Stitch {
    * Close console UI. Only take effect in dev mode.
    */
   hideConsoleUI () {
+    this.#checkConfigReady()
+
     if (this.#state.devMode) {
       // TODO
     }
   };
 
   getAppManager () {
-    return appManager
+    return this.#checkStitchStarted() ? appManager : null
   };
 
   getConfigManager () {
-    return configManager
+    return this.#checkConfigReady() ? configManager : null
   }
 
   getServiceManager () {
-    return serviceManager
+    return this.#checkStitchStarted() ? serviceManager : null
   }
 
   setGlobalOptions (...args) {
-    configManager.setGlobalOptions(...args)
+    if (this.#checkConfigReady()) { configManager.setGlobalOptions(...args) }
   }
 
   setAppOptions (...args) {
-    configManager.setAppOptions(...args)
+    if (this.#checkConfigReady()) { configManager.setAppOptions(...args) }
   }
 
   setServiceOptions (...args) {
-    configManager.setServiceOptions(...args)
+    if (this.#checkConfigReady()) { configManager.setServiceOptions(...args) }
   }
 
   addService (...args) {
-    serviceManager.addService(...args)
+    if (this.#checkConfigReady()) { serviceManager.addService(...args) }
   }
 }
 

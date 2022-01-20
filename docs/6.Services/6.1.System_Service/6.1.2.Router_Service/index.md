@@ -2,13 +2,13 @@
 
 If we are developing a SPA with multiple pages, A router is needed for routing to different pages, passing data from one component to another component.
 
-In this case, the Router should be a single instance server to those pages and make it consistent with browser behavior.
+In this case, the Router should be a single instance serve to those pages and make it consistent with browser behavior.
 
-In Stitch, Router Service was born for server these purposes:
+In Stitch, Router Service was born for serve these purposes:
 
-1. Eliminate different history instances from Host to MFA
-2. Establish a consolidated interface to different MFA
-3. Give us a much useful advanced API to reduce MFA's development effort.
+1. Eliminate different history instances from Host to MFA
+2. Establish a consolidated interface to different MFA
+3. Give us a much useful advanced API to reduce MFA's development effort.
 
 For more you need to know is, Router Service is an optional service in Stitch.
 
@@ -22,11 +22,11 @@ Let's see how we use it in Stitch here
 
 As the mainstream history library already become the standard router-base library for most of our applications, We will ride on it either.
 
-```js
+```console
 npm install history -s
 ```
 
-### Initialization
+### Configuration
 
 Register it in Stitch config. We are now supporting 4/5(the version what you are using now) two different history version here.
 
@@ -42,7 +42,16 @@ services: [
 ];
 ```
 
+Support version:
+| Name      | History Version |
+| --------- | --------------- |
+| HistoryV4 | ^4.0.0          |
+| HistoryV5 | ^5.0.0          |
+
+## Example
+
 Pass the history you are using before Stitch started it.
+In Host:
 
 ```js
 import { createHashHistory } from "history";
@@ -56,47 +65,13 @@ stitch.config(config, { history });
 const stitchConfigManager = stitch.getConfigManager();
 
 stitch.start();
-
-// use the same history into your host
-const router = (
-  <Provider store={stores}>
-    <ConnectedRouter history={history}>
-      <Switch>
-        <Route
-          key={uuidv5("hsbc-mfe-host".toString(), ROUTE_KEY_NAMESPACE)}
-          path="/mfe/:routerName"
-          component={(props) =>
-            AppHost({
-              appName: stitchConfigManager.getAppName(
-                _get(props, "match.params.routerName", "")
-              ),
-              ...props,
-            })
-          }
-        />
-        {routes.map((route) => (
-          <Route
-            key={uuidv5(
-              (route.getComponent || route.component || route.path).toString(),
-              ROUTE_KEY_NAMESPACE
-            )}
-            exact
-            {...route}
-            component={LoadAsync}
-          />
-        ))}
-      </Switch>
-    </ConnectedRouter>
-  </Provider>
-);
 ```
 
-## Example on MFA
-
 Get it from host context, and pass it to your component.
+In MFA:
 
 ```jsx
-export default function NewInwardPaymentSummary(props) {
+export default function MFAComponent(props) {
   const { services } = props.hostContext;
   const routerService = services.getService("router_service");
 
@@ -105,7 +80,7 @@ export default function NewInwardPaymentSummary(props) {
       <PayerContext.Consumer>
         {(pro) => {
           return (
-            <InwardPaymentSummary
+            <TestComponent
               {...props.hostContext}
               history={routerService.history}
               location={routerService.history.location}
@@ -123,39 +98,44 @@ Use it with history Standard API
 
 ```js
 class TestComponent extends Component {
-  backToSummary = () => {
+  goto = (path) => {
     const { history } = this.props;
     history.push({
-      pathname: constant.PAYER_MANAGEMENT_SUMMARY,
+      pathname: path,
     });
   };
-  ....
+  // ...
 }
 ```
 
-## API
+## Interface
 
 Below are the basic methods we expose in Router Service.
-| Name | Type | Description |
-| ---------------------- | -------- | --------------------------------------------------- |
-| history | RouterAdpater | The object has the same properties as History V5 |
-| navPrompt | NavPrompt | Advance API, Will cover it in another Session |
-| pushApp | (appName: string, path?: string, state?: obj) => void | advance API for navigating to another MFA |
-| replaceApp | (appName: string, path?: string, state?: obj) => void | advance API for navigating to another MFA |
-| getRouterMode | () => 'hash' \| 'browser' | Moves the pointer in the history stack by n entries |
 
-Below are the basic methods in RouterAdpater .
-| Name | Type | Description |
-| ---------------------- | -------- | --------------------------------------------------- |
-| replace(path, [state]) | void | Replaces the current entry on the history stack |
-| push(path, [state]) | void | Pushes a new entry onto the history stack |
-| location | Location | standard location object |
-| listen | void | Listen for changes to the current location |
-| go(n) | void | Moves the pointer in the history stack by n entries |
-| forward | void | Equivalent to go(1) |
-| block(prompt) | void | Prevents navigation |
-| back | void | Equivalent to go(-1) |
-| action | void | The current action (PUSH, REPLACE, or POP) |
+| Name          | Type                                                                                                                                                           | Description                                         |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| history       | [RouterAdaptor](#routeradaptor-interface)                                                                                                                      | The object has the same properties as History V5    |
+| navPrompt     | [NavPrompt](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.2.NavPrompt.md#interface) | Advance API, Will cover it in another Session       |
+| pushApp       | (appName: string, path?: string, state?: obj) => void                                                                                                          | Advance API for navigating to another MFA           |
+| replaceApp    | (appName: string, path?: string, state?: obj) => void                                                                                                          | Advance API for navigating to another MFA           |
+| getRouterMode | () => 'hash' \| 'browser'                                                                                                                                      | Return which mode history is using
+ |
+
+### RouterAdaptor Interface
+
+Follow [the interface](https://v5.reactrouter.com/web/api/history) of the history package.
+
+| Member                 | Type                                   | Description                                                                                                                                                                                                                                                                                                                           |
+| ---------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| action                 | string (readonly)                      | The current action (`PUSH`, `REPLACE`, or `POP`).                                                                                                                                                                                                                                                                                     |
+| location               | object (readonly)                      | The current location. May have the following properties:<br/>- `pathname` (string): The path of the URL<br/>- `search` (string): The URL query string<br/>- `hash` (string): The URL hash fragment<br/>- `state` (object): location-specific state that was provided to e.g. push(path, state) when this location was pushed onto the |
+| push(path, [state])    | (path: string, state?: object) => void | Pushes a new entry onto the history stack.                                                                                                                                                                                                                                                                                            |
+| replace(path, [state]) | (path: string, state?: object) => void | Replaces the current entry on the history stack.                                                                                                                                                                                                                                                                                      |
+| go(n)                  | (n: number) => void                    | Moves the pointer in the history stack by n entries.                                                                                                                                                                                                                                                                                  |
+| back()                 | () => void                             | Equivalent to go(`-1`).                                                                                                                                                                                                                                                                                                               |
+| forward()              | () => void                             | Equivalent to go(`1`).                                                                                                                                                                                                                                                                                                                |
+| block(blocker)         | (blocker: function) => void            | Prevents navigation (see [the history docs](https://github.com/remix-run/history/blob/main/docs/blocking-transitions.md))                                                                                                                                                                                                             |
+| listen(listener)       | (listener: function) => void           | Listen for changes to the current location (see [the history docs](https://github.com/remix-run/history/blob/main/docs/getting-started.md#listening))                                                                                                                                                                                 |
 
 ## Support for multiple versions of History
 
@@ -163,32 +143,7 @@ History v5 is the default version we are supporting now.
 However, we need to support the existing app which can't update easily.
 In that case, you might need to enhance or correct its behaviors by our designated interface.
 
-```js
-/**
-* In HSBC NET, we are using history v4, so we might be facing some API have different name
-* So we override its function(such as the back method), and its behavior align with V5
-**/
-class HistoryAdaptorV4 extends RouterAdaptor {
-  back() {
-    this.history.goBack();
-  }
-
-  forward() {
-    this.history.goForward();
-  }
-
-  // ...overide above methods if you are using another library
-}
-
-// Programmable controlling of app config options
-stitch.setAppOptions('router_service', {
-  ...stitch.getConfigManager().getAppConfig('router_service').options,
-  history: new HistoryAdaptorv4();
-});
-
-```
-
-[Further more for customer Adaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.RouterAdaptor.md)
+[Further more for Customer Router Adaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.Customer_Adaptor.md)
 
 ## Sub Router in MFEApp
 
@@ -198,65 +153,11 @@ In Stitch, we support multiple pages behind in a specific path. which means that
 
 In this case, We suggest developer implement it in its codebase.
 
-### Example
+Example reference:
 
-```jsx
-import React from "react";
-import ReactDOM from "react-dom";
-import InwardPaymentSummary from "./mfepages/inwardPaymentSummary";
-import InwardPaymentDetail from "./mfepages/inwardPaymentDetail";
-import {
-  BrowserRouter as Router,
-  HashRouter,
-  Switch,
-  Route,
-} from "react-router-dom";
-
-class InwardPayment {
-  constructor(component) {
-    this.rootDom = null;
-    this.hostContext = null;
-    this.component = component;
-    this.unblock = null;
-  }
-
-  init(hostContext) {
-    this.hostContext = hostContext;
-  }
-
-  mount(dom) {
-    this.rootDom = dom;
-    const hostPath = "/mfe/pending-inward-payments-summary";
-    ReactDOM.render(
-      <HashRouter>
-        <Switch>
-          <Route
-            exact
-            path={`/mfe/${hostPath}`}
-            component={() => (
-              <InwardPaymentSummary hostContext={this.hostContext} />
-            )}
-          ></Route>
-          <Route
-            exact
-            path={`/mfe/${hostPath}/detail`}
-            component={() => (
-              <InwardPaymentDetail hostContext={this.hostContext} />
-            )}
-          ></Route>
-        </Switch>
-      </HashRouter>,
-      dom
-    );
-  }
-
-  unmount(dom) {
-    ReactDOM.unmountComponentAtNode(this.rootDom || dom);
-  }
-}
-```
+- [Routing Example](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/develop/docs/7.Best_Practice/7.3.Routing_Example.md)
 
 ## Table of Contents
 
-- [Navigation Prompt](<https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.2.Navigation_Prompt(Nav_Prompt).md>)
-- [CustomerAdaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.CustomerAdaptor.md)
+- [Navigation Prompt](<https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.2.Navigation_Prompt(Navigation_Prompt).md>)
+- [Customer Router Adaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.Customer_Adaptor.md)

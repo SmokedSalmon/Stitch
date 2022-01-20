@@ -1,11 +1,9 @@
 import { IHostContext } from './HostContext'
 
 export interface IMFEApp {
-  readonly hostContext: IHostContext
-
   require: () => string[]
 
-  init: (hostContext: IHostContext) => void
+  init: ((hostContext: IHostContext) => Promise<any>) | ((hostContext: IHostContext) => void)
 
   mount: (dom: HTMLElement) => void
 
@@ -21,7 +19,7 @@ export default abstract class MFEApp implements IMFEApp {
     }
   }
 
-  get hostContext (): IHostContext {
+  protected get hostContext (): IHostContext {
     return this.#hostContext
   }
 

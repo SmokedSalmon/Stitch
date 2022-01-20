@@ -1,4 +1,4 @@
-import { uniq, set } from 'lodash'
+import { uniq, set, cloneDeep } from 'lodash'
 
 let sideEffectTarget
 
@@ -26,7 +26,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
   }
 
   if (!schema) {
-    throw new Error(`Schema error: unexpected key (node) of ${schemaPath}`)
+    throw new TypeError(`Schema error: unexpected key or property at ${schemaPath}`)
   }
 
   if (schema.$ref) {
@@ -42,12 +42,12 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
   }
 
   if (!(type && typeof type === 'string')) {
-    throw new Error(`Schema error: missing type define of ${schemaFullPath}`)
+    throw new TypeError(`Schema error: missing type define of ${schemaFullPath}`)
   }
 
   if (oneOf) {
     if (!(oneOf instanceof Array)) {
-      throw new Error(`Schema error: oneOf rule of ${schemaFullPath} should be an array`)
+      throw new TypeError(`Schema error: oneOf rule of ${schemaFullPath} should be an array`)
     }
 
     // recursive validate oneOf rule
@@ -82,7 +82,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
         throw validError
       }
 
-      throw new Error(`Config validate error: ${configPath} should match one of schema ${schemaFullPath}/oneOf`)
+      throw new TypeError(`Config validate error: ${configPath} should match one of schema ${schemaFullPath}/oneOf`)
     }
   }
 
@@ -110,24 +110,26 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
         break
       }
       default:
-        throw new Error(`Schema error: unsupported format of ${schemaFullPath}`)
+        throw new TypeError(`Schema error: unsupported format of ${schemaFullPath}`)
     }
 
     if (!regex.test(config)) {
-      throw new Error(`Config validate error: ${configPath} should be the format of ${format}`)
+      throw new TypeError(`Config validate error: ${configPath} should be the format of ${format}`)
     }
   }
 
   switch (type) {
     case 'object': {
+      // TODO support default value of object type
+
       if (typeof config !== 'object' || config instanceof Array) {
-        throw new Error(`Config validate error: ${configPath} should be an object`)
+        throw new TypeError(`Config validate error: ${configPath} should be an object`)
       }
 
       const { properties, required = [] } = schema
 
       if (!(properties && properties instanceof Object)) {
-        throw new Error(`Schema error: missing properties define of type "object" schema node ${schemaFullPath}`)
+        throw new TypeError(`Schema error: missing properties define of type "object" schema node ${schemaFullPath}`)
       }
 
       if (Object.keys(properties).length > 0) {
@@ -144,40 +146,55 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
 
       required.forEach(key => {
         if (!Object.prototype.hasOwnProperty.call(config, key)) {
-          throw new Error(`Config validate error: missing required property "${key}" of ${configPath}`)
+          throw new TypeError(`Config validate error: missing required property "${key}" of ${configPath}`)
         }
       })
 
       break
     }
     case 'array' : {
+      const { default: schemaDefault } = schema
+
+      if (Object.prototype.hasOwnProperty.call(schema, 'default')) {
+        if (!(schemaDefault instanceof Array)) {
+          throw new TypeError(`Schema error: default define of type "array" schema node ${schemaFullPath} should be an Array`)
+        }
+
+        if (!config && !(config instanceof Array)) {
+          const defaultValue = cloneDeep(schemaDefault)
+          // side-effect set default value of config by schema define
+          set({ config: sideEffectTarget }, configPath, defaultValue)
+          config = defaultValue
+        }
+      }
+
       if (!(config instanceof Array)) {
-        throw new Error(`Config validate error: ${configPath} should be an array`)
+        throw new TypeError(`Config validate error: ${configPath} should be an array`)
       }
 
       const { items, uniqueItems, minItems } = schema
 
       if (!(items && items instanceof Object)) {
-        throw new Error(`Schema error: missing items define of type "array" schema node ${schemaFullPath}`)
+        throw new TypeError(`Schema error: missing items define of type "array" schema node ${schemaFullPath}`)
       }
 
       if (minItems) {
         if (typeof minItems !== 'number') {
-          throw new Error(`Schema error: minItems define of type "array" schema node ${schemaFullPath} should be a number`)
+          throw new TypeError(`Schema error: minItems define of type "array" schema node ${schemaFullPath} should be a number`)
         }
 
         if (config.length < minItems) {
-          throw new Error(`Config validate error: ${configPath} should contains at least ${minItems} item`)
+          throw new TypeError(`Config validate error: ${configPath} should contains at least ${minItems} item`)
         }
       }
 
       if (uniqueItems) {
         if (typeof uniqueItems !== 'boolean') {
-          throw new Error(`Schema error: uniqueItems define of type "array" schema node ${schemaFullPath} should be a boolean`)
+          throw new TypeError(`Schema error: uniqueItems define of type "array" schema node ${schemaFullPath} should be a boolean`)
         }
 
         if (config.length !== uniq(config).length) {
-          throw new Error(`Config validate error: items of ${configPath} should be unique`)
+          throw new TypeError(`Config validate error: items of ${configPath} should be unique`)
         }
       }
 
@@ -193,7 +210,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
 
       if (Object.prototype.hasOwnProperty.call(schema, 'default')) {
         if (typeof schemaDefault !== 'string') {
-          throw new Error(`Schema error: default define of type "string" schema node ${schemaFullPath} should be a string`)
+          throw new TypeError(`Schema error: default define of type "string" schema node ${schemaFullPath} should be a string`)
         }
 
         if (typeof config !== 'string') {
@@ -204,16 +221,16 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
       }
 
       if (typeof config !== 'string') {
-        throw new Error(`Config validate error: ${configPath} should be a string`)
+        throw new TypeError(`Config validate error: ${configPath} should be a string`)
       }
 
       if (schemaEnum) {
         if (!(schemaEnum instanceof Array)) {
-          throw new Error(`Schema error: enum define of type "string" schema node ${schemaFullPath} should be an Array`)
+          throw new TypeError(`Schema error: enum define of type "string" schema node ${schemaFullPath} should be an Array`)
         }
 
         if (!schemaEnum.includes(config)) {
-          throw new Error(`Config validate error: ${configPath} should be a value in the enum ${schemaFullPath}/enum`)
+          throw new TypeError(`Config validate error: ${configPath} should be a value in the enum ${schemaFullPath}/enum`)
         }
       }
 
@@ -223,30 +240,32 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
         try {
           regex = new RegExp(pattern)
         } catch (e) {
-          throw new Error(`Schema error: pattern define of type "string" ${schemaFullPath} should be a RegExp constructable string`)
+          throw new TypeError(`Schema error: pattern define of type "string" ${schemaFullPath} should be a RegExp constructable string`)
         }
 
         if (!regex.test(config)) {
-          throw new Error(`Config validate error: ${configPath} should match the pattern of ${schemaFullPath}/pattern`)
+          throw new TypeError(`Config validate error: ${configPath} should match the pattern of ${schemaFullPath}/pattern`)
         }
       }
 
       break
     }
     case 'number': {
+      // TODO support default value of number type
+
       if (typeof config !== 'number') {
-        throw new Error(`Config validate error: ${configPath} should be a number`)
+        throw new TypeError(`Config validate error: ${configPath} should be a number`)
       }
 
       const { maximum } = schema
 
       if (maximum) {
         if (typeof maximum !== 'number') {
-          throw new Error(`Schema error: maximum define of type "number" schema node ${schemaFullPath} should be a number`)
+          throw new TypeError(`Schema error: maximum define of type "number" schema node ${schemaFullPath} should be a number`)
         }
 
         if (config > maximum) {
-          throw new Error(`Config validate error: the maximum value of ${configPath} is ${maximum}`)
+          throw new TypeError(`Config validate error: the maximum value of ${configPath} is ${maximum}`)
         }
       }
 
@@ -257,7 +276,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
 
       if (Object.prototype.hasOwnProperty.call(schema, 'default')) {
         if (typeof schemaDefault !== 'boolean') {
-          throw new Error(`Schema error: default define of type "boolean" schema node ${schemaFullPath} should be a boolean`)
+          throw new TypeError(`Schema error: default define of type "boolean" schema node ${schemaFullPath} should be a boolean`)
         }
 
         if (typeof config !== 'boolean') {
@@ -268,19 +287,19 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
       }
 
       if (typeof config !== 'boolean') {
-        throw new Error(`Config validate error: ${configPath} should be a boolean`)
+        throw new TypeError(`Config validate error: ${configPath} should be a boolean`)
       }
 
       break
     }
     case 'undefined':
       if (config !== undefined) {
-        throw new Error(`Config validate error: ${configPath} accept undefined, but received ${typeof config}`)
+        throw new TypeError(`Config validate error: ${configPath} accept undefined, but received ${typeof config}`)
       }
 
       break
     default:
-      throw new Error(`Schema error: unsupported type of ${schemaFullPath}`)
+      throw new TypeError(`Schema error: unsupported type of ${schemaFullPath}`)
   }
 
   return true

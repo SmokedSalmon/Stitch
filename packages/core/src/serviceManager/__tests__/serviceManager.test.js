@@ -1,79 +1,120 @@
+// Jest 26 & 27 has issue for fake timer + promise, we cannot use Jest's own fake timer to test asynchronous features
+// issue: https://stackoverflow.com/questions/51126786/jest-fake-timers-with-promises
+// Facebook team not yet fix it, pending issue: https://github.com/facebook/jest/pull/5171
+// Jest 27 has provided @sinonjs/fake-timers as a temporary solution, import here.
+import FakeTimers from "@sinonjs/fake-timers";
+import serviceManager from '../ServiceManager'
 
-import serviceManger from '../ServiceManager'
-import { MFEService } from '@stitch/types'
-
+// mock dependencies of other stitch modules
 jest.mock('@stitch/types/MFEService')
 jest.mock('../../configManager/ConfigManager')
+jest.mock('../../HostContext/createHostContext')
+// mocked dummy system services
+jest.mock('../../services/constants') // dummy service configs and implementation to be use in ServiceManager.js
 
-export const a1 = new (class extends MFEService {
-  require() { return ['b1', 'a2'] }
-  start() { super.start(); console.log('===> a1 starts'); }
-})
-
-export const a2 = new (class extends MFEService {
-  require() { return ['b2', 'c1', 'd1'] }
-  start() { super.start(); return new Promise((res) => setTimeout(() => {
-    console.log('===> a2 starts'); res();
-  }, 3000))}
-})
-
-export const b1 = new (class extends MFEService {
-  require() { return ['c1', 'c2', 'd1'] }
-  start() { super.start(); console.log('===> b1 starts'); }
-})
-
-export const b2 = new (class extends MFEService {
-  require() { return ['c1', 'circular_b4'] }
-  start() { super.start(); console.log('===> b2 starts'); }
-})
-
-export const b3 = new (class extends MFEService {
-  require() { return ['d1'] }
-  start() { super.start(); console.log('===> b3 starts'); }
-})
-
-export const circular_b4 = new (class extends MFEService {
-  require() { return ['a2', 'd2'] }
-  start() { super.start(); console.log('===> circular_b4 starts'); }
-})
-
-export const c1 = new (class extends MFEService {
-  start() { super.start(); return new Promise((res) => setTimeout(() => {
-    console.log('===> c1 starts'); res();
-  }, 3000))}
-})
-
-export const c2 = new (class extends MFEService {
-  require() { return ['d2'] }
-  start() { super.start(); console.log('===> c2 starts'); }
-})
-
-export const d1 = new (class extends MFEService {
-  start() { super.start(); return new Promise((res) => setTimeout(() => {
-    console.log('===> d1 starts'); res();
-  }, 2000))}
-})
-
-export const d2 = new (class extends MFEService {
-  start() { super.start(); return new Promise((res) => setTimeout(() => {
-    console.log('===> d2 starts'); res();
-  }, 5000))}
-})
-
-describe('Service Manager Start Sequence', () => {
+describe('Service Manager Start Sequence order tests', () => {
+  let fakeTimer
   beforeAll(() => {
-    return serviceManger.startServices(['a1', 'a2'])
+    // faked timer to control time flow for asynchronous feature testing
+    fakeTimer = FakeTimers.install()
   })
 
-  test('Service can require', () => {
-    a1.require()
-    expect(a1.require.mock.results[0].value).toEqual(['b1', 'a2'])
-    expect(a1.require.mock.calls.length).toBe(1)
+  afterAll(() => {
+    fakeTimer.uninstall() // clear fake timer
+    jest.clearAllMocks() // clear mock function statistics so that subsequent test suits won't be impact
   })
 
+  test('Async services are not started at the beginning of startServices(), and only starts after condition met', async () => {
+    serviceManager.startServices(['c2'])
+    // time mark 0.5s since sequence start, the synchronous part still takes some milliseconds to run
+    await fakeTimer.tickAsync(500)
+    const d2 = serviceManager.getServiceSync('d2')
+    const c2 = serviceManager.getServiceSync('c2')
+    expect(d2.start).toBeCalled()
+    expect(c2.start).not.toBeCalled()
+    // time mark 6.50s since sequence start
+    await fakeTimer.tickAsync(6000)
+    expect(c2.start).toBeCalled()
+  })
+})
 
-  test('Service starts in Sequence', async () => {
+describe('Service Manager full Start Sequence tests for overall results', () => {
+  let a1, a2, b1, b2, b3, circular_b4, c1, c2, d1, d2
+  beforeAll(
+    () => serviceManager.startServices(['a1', 'a2']).then(() => {
+      a1 = serviceManager.getServiceSync('a1')
+      a2 = serviceManager.getServiceSync('a2')
+      b1 = serviceManager.getServiceSync('b1')
+      b2 = serviceManager.getServiceSync('b2')
+      b3 = serviceManager.getServiceSync('b3')
+      circular_b4 = serviceManager.getServiceSync('circular_b4')
+      c1 = serviceManager.getServiceSync('c1')
+      c2 = serviceManager.getServiceSync('c2')
+      d1 = serviceManager.getServiceSync('d1')
+      d2 = serviceManager.getServiceSync('d2')
+    })
+  )
 
-    expect(a1.start.mock.calls.length).toBe(1)
+  afterAll(() => jest.clearAllMocks())
+
+  test('All REQUIRED services are started', async () => {
+    // wait to make sure all services started
+    expect(d1.start).toHaveBeenCalled()
+    expect(d2.start).toHaveBeenCalled()
+    expect(c1.start).toHaveBeenCalled()
+    expect(c2.start).toHaveBeenCalled()
+    expect(circular_b4.start).toHaveBeenCalled()
+    expect(b1.start).toHaveBeenCalled()
+    expect(b2.start).toHaveBeenCalled()
+    expect(a1.start).toHaveBeenCalled()
+    expect(a2.start).toHaveBeenCalled()
+  })
+
+  test('All required services are started only ONCE', async () => {
+    // wait to make sure all services started
+    expect(d1.start).toHaveBeenCalledTimes(1)
+    expect(d2.start).toHaveBeenCalledTimes(1)
+    expect(c1.start).toHaveBeenCalledTimes(1)
+    expect(c2.start).toHaveBeenCalledTimes(1)
+    expect(circular_b4.start).toHaveBeenCalledTimes(1)
+    expect(b1.start).toHaveBeenCalledTimes(1)
+    expect(b2.start).toHaveBeenCalledTimes(1)
+    expect(a1.start).toHaveBeenCalledTimes(1)
+    expect(a2.start).toHaveBeenCalledTimes(1)
+  })
+
+  test('Services that are not required should not be involved', () => {
+    expect(serviceManager.getServiceSync('b3').start).not.toHaveBeenCalled()
+  })
+
+  test('Services start in an order based on their dependency relationship', () => {
+    expect(serviceManager.getServiceSync('a1').start)
+      .toHaveBeenCalledAfter(serviceManager.getServiceSync('d1').start)
+  })
+})
+
+describe('Service Manager full Start Sequence tests for timing of each service (upon invoke & complete)', () => {
+  let fakeTimer
+  beforeAll(() => {
+    // faked timer to control time flow for asynchronous feature testing
+    fakeTimer = FakeTimers.install()
+    serviceManager.startServices(['a1', 'a2'])
+  })
+
+  test('Service start right after their sub-services resolved, independent to all other services including collateral relations', async () => {
+    // time mark 4.5s since sequence start
+    await fakeTimer.tickAsync(4500)
+    const d2 = serviceManager.getServiceSync('d2')
+    const c2 = serviceManager.getServiceSync('c2')
+    expect(d2.start).toBeCalled()
+    expect(c2.start).not.toBeCalled()
+    // time mark 5.1s since sequence start
+    await fakeTimer.tickAsync(600)
+    expect(c2.start).toBeCalled()
+  })
+
+  afterAll(() => {
+    fakeTimer.uninstall()
+    jest.clearAllMocks()
   })
 })

@@ -6,8 +6,6 @@ export type MFEServiceStatus = 'starting' | 'started' | 'stopped'
 export interface MFEClientService {}
 
 export interface IMFEService {
-  readonly hostContext: IHostContext
-
   require: () => string[]
 
   start: (hostContext: IHostContext) => Promise<any>
@@ -29,7 +27,7 @@ export default abstract class MFEService implements IMFEService {
     }
   }
 
-  get hostContext (): IHostContext {
+  protected get hostContext (): IHostContext {
     return this.#hostContext
   }
 

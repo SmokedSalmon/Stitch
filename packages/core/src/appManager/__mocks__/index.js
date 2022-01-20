@@ -1,15 +1,10 @@
+const state = {};
 const mockAppManager = {
-  getApp: (appName) => new Promise({
-    config: {},
-    instance: {
-      init: (hostContext) => hostContext,
-      mount: (dom) => {},
-      unmount: (dom) => {},
-      require: () => []
-    },
-    state: {},
-    hostContext: {}
-  })
+  state,
+  getApp: (appName) => new Promise(),
+  getHostContext: (name) => name,
+  setState: (appname, value) => {state[appname] = value},
+  getState: (appname) => state[appname]
 }
 
 export default mockAppManager

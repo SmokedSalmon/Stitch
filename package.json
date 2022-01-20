@@ -13,8 +13,7 @@
     "install:fix": "yarn install --ignore-scripts && npm rebuild core-js && npm run postinstall",
     "lint": "yarn workspaces run lint",
     "lint:stage": "eslint --fix",
-    "test": "jest --coverage",
-    "test_rm": "rm -rf temp"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -35,7 +34,7 @@
       "jest --watchAll=false -o --findRelatedTests"
     ]
   },
-  "dependencies": {
+  "devDependencies": {
     "@babel/core": "^7.16.0",
     "@babel/eslint-parser": "^7.16.3",
     "@babel/plugin-proposal-export-default-from": "^7.16.0",
@@ -50,6 +49,7 @@
     "core-js": "^3.19.1",
     "husky": "^7.0.4",
     "jest": "^27.3.1",
+    "jest-extended": "1.1.0",
     "lint-staged": "^12.1.2",
     "lodash": "^4.17.21",
     "rimraf": "^3.0.2",
