@@ -12,11 +12,11 @@
     {%- include header.html -%}
   </header>
   <div class="main-container row">
-
     <aside id="site-toc" class="site-toc d-none d-lg-block">
       {%- include sidebar.html -%}
     </aside>
-    <div class="main-content">
+    <!-- markdown-body class is essential for theme to apply on markdown content -->
+    <div class="main-content markdown-body">
       {{ content }}
     </div>
     <aside class="page-toc d-none d-lg-block">

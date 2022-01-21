@@ -4,7 +4,7 @@ title: Stitch Documentation
 plugins:
   - jemoji
 
-theme: jekyll-theme-minimal
+theme: jekyll-theme-primer
 
 collections_dir: ./_collections
 collections:

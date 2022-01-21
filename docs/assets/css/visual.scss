@@ -5,11 +5,13 @@ $secondary_color: #4BA6A9;
 $secondary_color_light: lightblue;
 $secondary_color_lighter: #ebffff;
 
-body {
+header, aside {
   a {
     color: $font_main;
+    text-decoration: none;
     &:hover {
       color: $secondary_color;
+      text-decoration: none;
     }
   }
 }
