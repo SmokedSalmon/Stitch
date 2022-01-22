@@ -2,4 +2,10 @@
 <!-- <div class="header-link examples"><button><a href="{{ '/examples' | relative_url }}">Examples</a></button></div> -->
 <div class="header-link about"><button><a href="{{ '/about' | relative_url }}">About us</a></button></div>
 <div class="header-link export">{%- include export_pdf_button.html -%}</div>
-<div class="header-link github-repo"><a href="{{ site.github_repo }}"><i class='icon' /></a></div>
+<div class="header-link github-repo">
+  <button>
+    <a href="{{ site.github_repo }}">
+      <img class="icon" src="{{ '/assets/github-mark-light.png' | relative_url }}" title="Visit our repository" alt="Visit our repository">
+    </a>
+  </button>
+</div>
