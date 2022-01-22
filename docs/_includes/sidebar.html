@@ -91,6 +91,12 @@
       return iterator
     }
 
+    function sanitizeUrl(url) {
+      try {
+        return url.replace(/\.html?$/, '')
+      } catch (err) { return url }
+    }
+
     function sanitizeTitle(title) {
       try {
         // replace _, -, + between words with space
@@ -187,6 +193,7 @@
     // ** main ** //
     toc_data.forEach((pageData) => {
       const { name, dir, url, relative_url, title } = pageData;
+      const relative_path = sanitizeUrl(relative_url)
 
       // check if dir in the toc_structure exists
       let dir_node = findDirInStruct(dir) || createDirInStruct(dir);
@@ -196,10 +203,21 @@
       const isIndexPage = filename.indexOf('index') > -1;
       if (isIndexPage) {
         // There is an index page of the directory, make the label both label/show/hide handler and also a link
-        dir_node.data = { ...dir_node.data, url, relative_url, dir }
+        dir_node.data = {
+          ...dir_node.data,
+          url: sanitizeUrl(url),
+          relative_url: sanitizeUrl(relative_url),
+          dir
+        }
       } else {
         // other sub pages under the directory
-        dir_node.children.push({ data: { name, title, url, relative_url, dir } })
+        dir_node.children.push({
+          data: {
+            name, title, dir,
+            url: sanitizeUrl(url),
+            relative_url: sanitizeUrl(relative_url)
+          }
+        })
       }
     });
 
