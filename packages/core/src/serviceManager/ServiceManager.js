@@ -8,7 +8,7 @@ import {
   SERVICE_AUTOLOAD
 } from './constants'
 import { globalState, log } from '../utils'
-import { SERVICE_STATUS, ROUTER_SERVICE, MAX_SERVICE_DEPENDENCY_DEPTH } from '../constants'
+import { SERVICE_STATUS, ROUTER_SERVICE, MAX_SERVICE_DEPENDENCY_DEPTH, REMOTE_ENTRY } from '../constants'
 import { createHostContext } from '../HostContext'
 import { loadScriptAsync } from '../utils/loadModule'
 
@@ -138,8 +138,7 @@ class ServiceManager {
     return loadScriptAsync(libUrl, libName, name)
       .then(() => {
         return window[libName]
-        // 'services' module, defined in remote module's webpack config - ModuleFederationPlugin plugin's library.name
-          .get('services')
+          .get(REMOTE_ENTRY)
           .then(module => module().default.getService(name))
           .catch(err => {
             this.#logger.error(`Cannot find service '${name} in module '${libName}' @ '${libUrl}'`, 'SM-N-4001')

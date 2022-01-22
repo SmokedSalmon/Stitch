@@ -34,6 +34,7 @@ class Stitch {
       configManager.updateConfig(config)
     } catch (error) {
       this.#logger.fatal(error, 'SC-P-5001')
+      return
     }
 
     this.#state.configReady = true
@@ -45,26 +46,31 @@ class Stitch {
     this.#state.history = router && router.history
   }
 
-  start () {
+  async start () {
     if (this.#state.stitchStart) {
       this.#logger.warn('The Stitch has been started.', 'SC-O-3002')
       return
     }
 
-    return serviceManager.getServices({ type: SERVICE_TYPE_LIB, [SERVICE_AUTOLOAD]: true })
-      .then(() => {
-        // [TODO](next Sprint) move this indicator after .startAllServices().then(() => {})
-        this.#state.stitchStart = true
+    try {
+      await serviceManager.getServices({ type: SERVICE_TYPE_LIB, [SERVICE_AUTOLOAD]: true })
 
-        // start all prioritized/critical services
-        return serviceManager.startAllServices()
-      }).catch((err) => {
-        this.#state.stitchStart = false
-        const stitchStartError = new Error('The Stitch start fail.')
-        this.#logger.fatal(stitchStartError, 'SC-O-5002')
-        this.#logger.debug(err, '')
-        throw stitchStartError
-      })
+      // start all prioritized/critical services
+      await serviceManager.startAllServices()
+
+      this.#state.stitchStart = true
+
+      return Promise.resolve(this)
+    } catch (err) {
+      this.#logger.debug(err, '')
+    }
+
+    this.#state.stitchStart = false
+
+    const stitchStartError = new Error('The Stitch start fail.')
+    this.#logger.fatal(stitchStartError, 'SC-O-5002')
+
+    return Promise.reject(stitchStartError)
   };
 
   /**

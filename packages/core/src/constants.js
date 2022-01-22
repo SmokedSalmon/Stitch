@@ -22,7 +22,11 @@ export const SERVICE_STATUS = {
   stopped: 'stopped'
 }
 
-export const REMOTE_APP = 'RemoteApp'
+/**
+ * The fixed name of webpack 5 ModuleFederationPlugin exposes item.
+ * Stitch will get MFELib from the exposes item.
+ */
+export const REMOTE_ENTRY = 'RemoteEntry'
 
 /**
  * Browser mode - Hard navigation

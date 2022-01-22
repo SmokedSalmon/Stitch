@@ -45,6 +45,8 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
     throw new TypeError(`Schema error: missing type define of ${schemaFullPath}`)
   }
 
+  let schemaWillBeChangedByOneOf = schema
+
   if (oneOf) {
     if (!(oneOf instanceof Array)) {
       throw new TypeError(`Schema error: oneOf rule of ${schemaFullPath} should be an array`)
@@ -65,7 +67,8 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
         )(config, configPath)
         // choose first valid type matched oneOf schema
         if (valid) {
-          schema = {
+          schemaWillBeChangedByOneOf = {
+            ...schema,
             type: schema.type,
             ...item
           }
@@ -77,11 +80,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
 
       return valid
     })
-    if (!oneOfValid) {
-      if (validError) {
-        throw validError
-      }
-
+    if (!oneOfValid && validError) {
       throw new TypeError(`Config validate error: ${configPath} should match one of schema ${schemaFullPath}/oneOf`)
     }
   }
@@ -114,11 +113,13 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
     }
 
     if (!regex.test(config)) {
-      throw new TypeError(`Config validate error: ${configPath} should be the format of ${format}`)
+      throw new TypeError(`Config validate error: ${configPath} should be the format of ${format} of schema node ${schemaFullPath}`)
     }
   }
 
-  switch (type) {
+  const { type: typeWillBeChangedByOneOf } = schemaWillBeChangedByOneOf
+
+  switch (typeWillBeChangedByOneOf) {
     case 'object': {
       // TODO support default value of object type
 
@@ -126,7 +127,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
         throw new TypeError(`Config validate error: ${configPath} should be an object`)
       }
 
-      const { properties, required = [] } = schema
+      const { properties, required = [] } = schemaWillBeChangedByOneOf
 
       if (!(properties && properties instanceof Object)) {
         throw new TypeError(`Schema error: missing properties define of type "object" schema node ${schemaFullPath}`)
@@ -153,9 +154,9 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
       break
     }
     case 'array' : {
-      const { default: schemaDefault } = schema
+      const { default: schemaDefault } = schemaWillBeChangedByOneOf
 
-      if (Object.prototype.hasOwnProperty.call(schema, 'default')) {
+      if (Object.prototype.hasOwnProperty.call(schemaWillBeChangedByOneOf, 'default')) {
         if (!(schemaDefault instanceof Array)) {
           throw new TypeError(`Schema error: default define of type "array" schema node ${schemaFullPath} should be an Array`)
         }
@@ -172,7 +173,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
         throw new TypeError(`Config validate error: ${configPath} should be an array`)
       }
 
-      const { items, uniqueItems, minItems } = schema
+      const { items, uniqueItems, minItems } = schemaWillBeChangedByOneOf
 
       if (!(items && items instanceof Object)) {
         throw new TypeError(`Schema error: missing items define of type "array" schema node ${schemaFullPath}`)
@@ -206,9 +207,9 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
       break
     }
     case 'string': {
-      const { enum: schemaEnum, default: schemaDefault, pattern } = schema
+      const { enum: schemaEnum, default: schemaDefault, pattern } = schemaWillBeChangedByOneOf
 
-      if (Object.prototype.hasOwnProperty.call(schema, 'default')) {
+      if (Object.prototype.hasOwnProperty.call(schemaWillBeChangedByOneOf, 'default')) {
         if (typeof schemaDefault !== 'string') {
           throw new TypeError(`Schema error: default define of type "string" schema node ${schemaFullPath} should be a string`)
         }
@@ -257,7 +258,7 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
         throw new TypeError(`Config validate error: ${configPath} should be a number`)
       }
 
-      const { maximum } = schema
+      const { maximum } = schemaWillBeChangedByOneOf
 
       if (maximum) {
         if (typeof maximum !== 'number') {
@@ -272,9 +273,9 @@ const validate = (schema, schemaPath = '') => (config, configPath = 'config') =>
       break
     }
     case 'boolean': {
-      const { default: schemaDefault } = schema
+      const { default: schemaDefault } = schemaWillBeChangedByOneOf
 
-      if (Object.prototype.hasOwnProperty.call(schema, 'default')) {
+      if (Object.prototype.hasOwnProperty.call(schemaWillBeChangedByOneOf, 'default')) {
         if (typeof schemaDefault !== 'boolean') {
           throw new TypeError(`Schema error: default define of type "boolean" schema node ${schemaFullPath} should be a boolean`)
         }

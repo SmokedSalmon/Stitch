@@ -77,6 +77,7 @@ let configManager = require('../index').default
 let logFatal
 let logError
 
+const stitchStartErrorCode = 'CM-O-4001'
 const updateConfigErrorCode = 'CM-P-5002'
 
 describe('ConfigManager', () => {
@@ -456,7 +457,7 @@ describe('ConfigManager when globalState stitchStart = true', () => {
 
     expect(logError.mock.calls.length).toBe(1)
     expect(logError.mock.calls[0][0]).toMatchSnapshot()
-    expect(logError.mock.calls[0][1]).toBe('CM-B-4001')
+    expect(logError.mock.calls[0][1]).toBe(stitchStartErrorCode)
   })
 
   test('updateConfig', () => {
@@ -464,7 +465,7 @@ describe('ConfigManager when globalState stitchStart = true', () => {
 
     expect(logError.mock.calls.length).toBe(1)
     expect(logError.mock.calls[0][0]).toMatchSnapshot()
-    expect(logError.mock.calls[0][1]).toBe('CM-B-4002')
+    expect(logError.mock.calls[0][1]).toBe(stitchStartErrorCode)
   })
 
   test('setAppOptions', () => {
@@ -472,7 +473,7 @@ describe('ConfigManager when globalState stitchStart = true', () => {
 
     expect(logError.mock.calls.length).toBe(1)
     expect(logError.mock.calls[0][0]).toMatchSnapshot()
-    expect(logError.mock.calls[0][1]).toBe('CM-B-4003')
+    expect(logError.mock.calls[0][1]).toBe(stitchStartErrorCode)
   })
 
   test('setServiceOptions', () => {
@@ -480,7 +481,7 @@ describe('ConfigManager when globalState stitchStart = true', () => {
 
     expect(logError.mock.calls.length).toBe(1)
     expect(logError.mock.calls[0][0]).toMatchSnapshot()
-    expect(logError.mock.calls[0][1]).toBe('CM-B-4004')
+    expect(logError.mock.calls[0][1]).toBe(stitchStartErrorCode)
   })
 })
 

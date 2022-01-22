@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validate format hostname: failed 1`] = `[TypeError: Config validate error: config should be the format of hostname of schema node mockedSchema_format_hostname]`;
+
+exports[`validate format ipv4: failed 1`] = `[TypeError: Config validate error: config should be the format of ipv4 of schema node mockedSchema_format_ipv4]`;
+
+exports[`validate format ipv6: failed 1`] = `[TypeError: Config validate error: config should be the format of ipv6 of schema node mockedSchema_format_ipv6]`;
+
+exports[`validate format unsupported 1`] = `[TypeError: Schema error: unsupported format of mockedSchema_format_unsupported]`;
+
+exports[`validate format uri: failed 1`] = `[TypeError: Config validate error: config should be the format of uri of schema node mockedSchema_format_uri]`;
+
+exports[`validate missing type define 1`] = `[TypeError: Schema error: missing type define of mockedSchema_type_unsupported]`;
+
+exports[`validate oneOf failed with wrong schema: wrong "oneOf" define 1`] = `[TypeError: Schema error: oneOf rule of mockedSchema_oneOf_wrong1 should be an array]`;
+
+exports[`validate oneOf: failed with unmatched oneOf 1`] = `[TypeError: Config validate error: config should match one of schema mockedSchema_oneOf/oneOf]`;
+
+exports[`validate type array failed with wrong schema: missing "items" define 1`] = `[TypeError: Schema error: missing items define of type "array" schema node mockedSchema_type_array_wrong2]`;
+
+exports[`validate type array failed with wrong schema: wrong "default" define 1`] = `[TypeError: Schema error: default define of type "array" schema node mockedSchema_type_array_wrong1 should be an Array]`;
+
+exports[`validate type array failed with wrong schema: wrong "minItems" define 1`] = `[TypeError: Schema error: minItems define of type "array" schema node mockedSchema_type_array_wrong3 should be a number]`;
+
+exports[`validate type array failed with wrong schema: wrong "uniqueItems" define 1`] = `[TypeError: Schema error: uniqueItems define of type "array" schema node mockedSchema_type_array_wrong4 should be a boolean]`;
+
+exports[`validate type array with minItems: failed 1`] = `[TypeError: Config validate error: config should contains at least 2 item]`;
+
+exports[`validate type array with uniqueItems: failed 1`] = `[TypeError: Config validate error: items of config should be unique]`;
+
+exports[`validate type array: failed with non-array 1`] = `[TypeError: Config validate error: config.arrayProperty should be an array]`;
+
+exports[`validate type boolean failed with wrong schema: wrong "default" define 1`] = `[TypeError: Schema error: default define of type "boolean" schema node mockedSchema_type_boolean_wrong1 should be a boolean]`;
+
+exports[`validate type boolean: failed with non-boolean 1`] = `[TypeError: Config validate error: config should be a boolean]`;
+
+exports[`validate type number failed with wrong schema: wrong "maximum" define 1`] = `[TypeError: Schema error: maximum define of type "number" schema node mockedSchema_type_number_wrong1 should be a number]`;
+
+exports[`validate type number: failed with maximum 1`] = `[TypeError: Config validate error: the maximum value of config is 200]`;
+
+exports[`validate type number: failed with non-number 1`] = `[TypeError: Config validate error: config should be a number]`;
+
+exports[`validate type object failed with wrong schema: missing "properties" define 1`] = `[TypeError: Schema error: missing properties define of type "object" schema node mockedSchema_type_object_failed]`;
+
+exports[`validate type object: failed with missing required key 1`] = `[TypeError: Config validate error: missing required property "requiredKey" of config]`;
+
+exports[`validate type object: failed with non-object 1`] = `[TypeError: Config validate error: config should be an object]`;
+
+exports[`validate type object: failed with unexpected key 1`] = `[TypeError: Schema error: unexpected key or property at mockedSchema_type_object/unexpectedKey]`;
+
+exports[`validate type string failed with wrong schema: wrong "default" define 1`] = `[TypeError: Schema error: default define of type "string" schema node mockedSchema_type_string_wrong1 should be a string]`;
+
+exports[`validate type string failed with wrong schema: wrong "enum" define 1`] = `[TypeError: Schema error: enum define of type "string" schema node mockedSchema_type_string_wrong2 should be an Array]`;
+
+exports[`validate type string failed with wrong schema: wrong "pattern" define 1`] = `[TypeError: Schema error: pattern define of type "string" mockedSchema_type_string_wrong3 should be a RegExp constructable string]`;
+
+exports[`validate type string with enum: failed with unexpected enum 1`] = `[TypeError: Config validate error: config should be a value in the enum mockedSchema_type_string_enum/enum]`;
+
+exports[`validate type string with pattern: failed with unexpected pattern 1`] = `[TypeError: Config validate error: config should match the pattern of mockedSchema_type_string_pattern/pattern]`;
+
+exports[`validate type string: failed with non-string 1`] = `[TypeError: Config validate error: config should be a string]`;
+
+exports[`validate type undefined: failed with non-undefined 1`] = `[TypeError: Config validate error: config accept undefined, but received string]`;
+
+exports[`validate type unsupported 1`] = `[TypeError: Schema error: unsupported type of mockedSchema_type_unsupported]`;

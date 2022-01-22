@@ -167,8 +167,24 @@ div.main-content {
 
 aside.page-toc {
     position: fixed;
-    width: 20%;
+    top: $header_height;
     right: 0;
+    width: 20%;
+    height: calc(100vh - #{$header_height});
+
+    overflow: hidden auto;
+    &::-webkit-scrollbar {
+        width: 6px;
+        display: none
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #dddddd;
+        border-radius: 5px;
+    }
+    &:hover::-webkit-scrollbar { display: block; }
+    // scrollbar for firefox
+    scrollbar-color: #dddddd transparent;
+
     [dir="rtl"] & { right: unset; left: 0 }
     ul {
         padding-inline-start: 1rem;
@@ -183,6 +199,11 @@ aside.page-toc {
         border-bottom: 1px solid lightgray;
         padding-bottom: .5rem;
     }
+}
+
+p {
+    word-break: break-all;
+    white-space: normal;
 }
 
 body.print {

@@ -10,6 +10,8 @@ collections_dir: ./_collections
 collections:
   exports:
     output: true
+  edit:
+    output: true
 
 # Some constants
 sidebar_excludes:

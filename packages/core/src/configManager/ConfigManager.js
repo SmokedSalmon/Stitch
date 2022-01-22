@@ -311,7 +311,7 @@ class ConfigManager {
    */
   setGlobalOptions (options = {}) {
     if (this.#state.stitchStart) {
-      this.#logger.error('The Stitch has been started, can not set global config options anymore.', 'CM-B-4001')
+      this.#logger.error('The Stitch has been started, can not set global config options anymore.', 'CM-O-4001')
       return
     }
 
@@ -338,7 +338,7 @@ class ConfigManager {
 
   updateConfig (config) {
     if (this.#state.stitchStart) {
-      this.#logger.error('The Stitch has been started, can not update config anymore.', 'CM-B-4002')
+      this.#logger.error('The Stitch has been started, can not update config anymore.', 'CM-O-4001')
       return
     }
 
@@ -360,7 +360,7 @@ class ConfigManager {
    */
   setAppOptions (appName, options = {}) {
     if (this.#state.stitchStart) {
-      this.#logger.error('The Stitch has been started, can not set app config options anymore.', 'CM-B-4003')
+      this.#logger.error('The Stitch has been started, can not set app config options anymore.', 'CM-O-4001')
       return
     }
 
@@ -397,7 +397,7 @@ class ConfigManager {
    */
   setServiceOptions (serviceName, options = {}) {
     if (this.#state.stitchStart) {
-      this.#logger.error('The Stitch has been started, can not set service config options anymore.', 'CM-B-4004')
+      this.#logger.error('The Stitch has been started, can not set service config options anymore.', 'CM-O-4001')
       return
     }
 

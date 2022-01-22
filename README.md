@@ -36,7 +36,7 @@ NOTE: @stitch/* only be released in the following internal nexus registries:
   - [Styling](/docs/7.Best_Practice/7.2.Styling.md)
   - [Routing Example](/docs/7.Best_Practice/7.3.RoutingForMicroFrontendApps_Example.md)
   - [Routing entitlement check](/docs/7.Best_Practice/7.4.Routing_Entitlement_Check.md)
-  - [How to used HostContext](/docs/7.Best_Practice/7.5.How_to_used_HostContext.md)
+  - [How to use HostContext](/docs/7.Best_Practice/7.5.How_to_use_HostContext.md)
   - [MFA Deployment](/docs/7.Best_Practice/7.6.MFA_Deployment.md)
   - [Version control and CDN](/docs/7.Best_Practice/7.7.Version_Control_And_CDN.md)
   - [Backup solution when CDN fails](/docs/7.Best_Practice/7.8.Backup_Solution_When_Cdn_Fails.md)

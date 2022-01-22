@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Markdown editor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script type="text/javascript" src="../assets/js/editor/main.js"></script>
+
+  <link rel="stylesheet" href="../assets/css/editor/style.css" />
+</head>
+<body>
+<textarea id="editing-area"></textarea>
+<div class="bottom-panel">
+  <button role="button" id="copy-and-go">Copy & Go<i class="fa fa-sign-out-alt icon-end"></i></button>
+  <button role="button" id="report-issue">Report bug<i class="fa fa-bug icon-end"></i></button>
+  <div id="coming-soon"><i class="far fa-heart icon-start"></i>To be supported</div>
+</div>
+<div id="draw-table-popup" class="popup">
+  <table class="draw-table-mockup">
+    <tbody>
+    <tr>
+      <td /><td /><td /><td /><td /><td /><td /><td />
+      <th /><th /><th /><th /><th /><th /><th /><th />
+    </tr>
+    <tr><td /><td /><td /><td /><td /><td /><td /><td /></tr>
+    <tr><td /><td /><td /><td /><td /><td /><td /><td /></tr>
+    <tr><td /><td /><td /><td /><td /><td /><td /><td /></tr>
+    <tr><td /><td /><td /><td /><td /><td /><td /><td /></tr>
+    <tr><td /><td /><td /><td /><td /><td /><td /><td /></tr>
+    <tr><td /><td /><td /><td /><td /><td /><td /><td /></tr>
+    <tr><td /><td /><td /><td /><td /><td /><td /><td /></tr>
+    </tbody>
+  </table>
+  <input type="checkbox" id="draw-table-toggle-header" name="Header">
+  <label for="draw-table-toggle-header">Header</label>
+</div>
+<div id="guide-popup" class="popup">
+  <p><a href="https://www.markdownguide.org/basic-syntax/">Markdown Basics</a></p>
+  <p><a href="https://www.markdownguide.org/extended-syntax/#tables">Extended Markdown Guide</a></p>
+</div>
+<div id="coming-soon-popup" class="popup">
+  <ul>
+    <li>高级table功能， 如对齐</li>
+    <li>直接从Github文件页提取内容至此页编辑</li>
+    <li>HTML粘贴转换， 能快速拷贝现有页面, 比如Confluence页内容</li>
+  </ul>
+</div>
+
+<div id="new-line-tip" class="popup">Press <span class="highlight">2 SPACE &#x237D + RETURN &#x2B90</span> = Markdown newline</div>
+<div id="new-paragraph-tip" class="popup">Press <span class="highlight">RETURN &#x2B90 x 2</span> = Markdown new paragraph</div>
+</body>
+</html>

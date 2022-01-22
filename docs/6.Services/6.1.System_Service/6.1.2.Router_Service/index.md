@@ -43,6 +43,7 @@ services: [
 ```
 
 Support version:
+
 | Name      | History Version |
 | --------- | --------------- |
 | HistoryV4 | ^4.0.0          |
@@ -143,7 +144,7 @@ History v5 is the default version we are supporting now.
 However, we need to support the existing app which can't update easily.
 In that case, you might need to enhance or correct its behaviors by our designated interface.
 
-[Further more for Customer Router Adaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.Customer_Adaptor.md)
+[Further more for Customize Router Adaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.Customer_Adaptor.md)
 
 ## Sub Router in MFEApp
 
@@ -160,4 +161,4 @@ Example reference:
 ## Table of Contents
 
 - [Navigation Prompt](<https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.2.Navigation_Prompt(Navigation_Prompt).md>)
-- [Customer Router Adaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.Customer_Adaptor.md)
+- [Customize Router Adaptor](https://alm-github.systems.uk.hsbc/Net-UI/stitch/blob/HEAD/docs/6.Services/6.1.System_Service/6.1.2.Router_Service/6.1.2.1.Customize_Adaptor.md)

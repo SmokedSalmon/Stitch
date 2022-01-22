@@ -1,0 +1,195 @@
+.popup {
+    background: white;
+    padding: 0.5rem;
+    border: 1px solid lightgray;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+button.new-paragraph i::before {
+    content: "\2B90"
+}
+button.new-paragraph::after {
+    content: "p";
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 900;
+    right: 1px;
+}
+button.new-line i::before {
+    content: "\2B90"
+}
+
+button.new-paragraph i::before, button.new-line i::before {
+    font-size: 16px;
+    top: 3px;
+    position: relative;
+    font-weight: 900;
+}
+
+#draw-table-popup {
+    width: auto;
+    z-index: 100;
+    visibility: hidden;
+    cursor: default;
+}
+button.table[title="Table"]:focus #draw-table-popup, button.table[title="Table"]:focus-within #draw-table-popup {
+    visibility: visible;
+}
+
+#draw-table-popup table.draw-table-mockup {
+    margin-top: -2px;
+    margin-inline-start: -2px;
+}
+#draw-table-popup .draw-table-mockup td {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid gray;
+    background: white;
+}
+#draw-table-popup .draw-table-mockup .included {
+    background-color: lightblue;
+}
+
+#draw-table-popup .draw-table-mockup th {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid gray;
+    background: white;
+    filter: brightness(0.8);
+    display: none;
+}
+
+#guide-popup {
+    width: 20rem;
+    z-index: 100;
+    text-align: start;
+    visibility: hidden;
+    cursor: default;
+}
+button.help:focus #guide-popup, button.help:focus-within #guide-popup {
+    visibility: visible;
+}
+#guide-popup p { margin-block: .5rem; }
+
+/* heading dropdown */
+button.heading.set::after {
+    content: '\f0dc';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 12px;
+    top: 4px;
+}
+button.heading.set, button.heading.set:hover { background: none };
+.editor-toolbar button.heading-4:after { content: '4'; }
+.editor-toolbar button.heading-5:after { content: '5'; }
+.editor-toolbar button.heading-6:after { content: '6'; }
+
+.editor-toolbar button.multiline-code-block::after { content: '+'; }
+
+/* Control panel */
+div.bottom-panel button#copy-and-go {
+    background: seagreen;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+
+div.bottom-panel button#report-issue {
+    border: none;
+    background: lightpink;
+    color: white;
+    border-radius: 2px;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+div.bottom-panel button#copy-and-go:hover,
+div.bottom-panel button#report-issue:hover {
+    filter:brightness(.9);
+}
+div.bottom-panel .icon-start { margin-inline-end: 0.5rem; }
+div.bottom-panel .icon-end { margin-inline-start: 0.5rem; }
+
+/* Coming-soon message */
+div#coming-soon {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: default;
+    padding: 6px 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #F5F5F5;
+    color: #888888;
+    border-radius: 5px;
+    height: 30px;
+    box-sizing: border-box;
+    background: #F5F5F5;
+}
+div#coming-soon:hover {
+    background: #F5F5F5;
+}
+div#coming-soon:hover div#coming-soon-popup { visibility: visible; }
+div#coming-soon-popup {
+    visibility: hidden;
+    z-index: -1;
+    background: #F5F5F5;
+    border: 0;
+}
+div#coming-soon-popup ul {
+    padding-inline-start: 10px;
+    margin-block: 5px;
+}
+
+/* new-line tip */
+div#new-line-tip, div#new-paragraph-tip {
+    visibility: hidden;
+    z-index: 100;
+    background: #F5F5F5;
+    border: 0;
+    font-size: 10px;
+    color: gray;
+    cursor: default;
+}
+div#new-line-tip.visible, div#new-paragraph-tip.visible {
+    visibility: visible;
+}
+div#new-line-tip .highlight, div#new-paragraph-tip .highlight { font-size: 12px; color: black; font-weight: 700 }
+
+/* Page layout */
+body {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    gap: 2rem;
+}
+body div.EasyMDEContainer {
+    flex: 1 1 90vh;
+    align-content: baseline;
+}
+div.CodeMirror, div.editor-preview {
+    min-height: 80vh;
+    max-height: 85vh;
+}
+div.bottom-panel {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 1rem 0;
+    gap: 1rem;
+}
+
+/* EasyMDE dropdown menu actions not working upon click bug fix */
+body .easymde-dropdown-content {
+    visibility: visible;
+    display: none;
+}
+body button.easymde-dropdown:active .easymde-dropdown-content,
+body button.easymde-dropdown:focus .easymde-dropdown-content,
+body button.easymde-dropdown:focus-within .easymde-dropdown-content {
+    display: block;
+}

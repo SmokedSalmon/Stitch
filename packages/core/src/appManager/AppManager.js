@@ -2,7 +2,7 @@ import { loadScriptAsync } from '../utils/loadModule'
 import configManager from '../configManager'
 import { createHostContext } from '../HostContext'
 import serviceManager from '../serviceManager'
-import { APP_STATUS, REMOTE_APP } from '../constants'
+import { APP_STATUS, REMOTE_ENTRY } from '../constants'
 import { log } from '../utils'
 
 class AppManager {
@@ -33,7 +33,7 @@ class AppManager {
         // eslint-disable-next-line no-undef
         await container.init(__webpack_share_scopes__.default)
         return container
-          .get(REMOTE_APP)
+          .get(REMOTE_ENTRY)
           .then((appModule) => {
             try {
               return appModule().default
