@@ -61,7 +61,7 @@ header#header {
 
         &.github-repo {
           .icon {
-            background-image: {{ "/assets/github-mark-light.png" | relative_url }};
+            background-image: url("{{ '/assets/github-mark-light.png' | relative_url }}");
           }
         }
     }
