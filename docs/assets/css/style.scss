@@ -58,6 +58,12 @@ header#header {
         &:last-child::after {
             content: none;
         }
+
+        &.github-repo {
+          .icon {
+            background-image: {{ "/assets/github-mark-light.png" | relative_url }};
+          }
+        }
     }
 }
 

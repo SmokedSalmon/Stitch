@@ -14,6 +14,7 @@ collections:
     output: true
 
 # Some constants
+github_repo: https://github.com/SmokedSalmon/Stitch/
 sidebar_excludes:
   - README.md
   - about.md
