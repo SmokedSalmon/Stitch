@@ -5,7 +5,7 @@
 @import "./bootstrap-grid.min.css";
 
 // define some constance here
-$body_padding: 1rem;
+$body_padding: 0rem;
 $header_height: 4rem;
 $theme-main-color: lightgray;
 $sidebar-width-fixed: 25vh;
@@ -161,6 +161,19 @@ aside#site-toc {
 
 div.main-content {
     width: 100%;
+    height: calc(100vh - #{$header_height});
+    overflow: auto;
+    &::-webkit-scrollbar {
+        width: 6px;
+        display: none
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #dddddd;
+        border-radius: 5px;
+    }
+    &:hover::-webkit-scrollbar { display: block; }
+    // scrollbar for firefox
+    scrollbar-color: #dddddd transparent;
 }
 
 @media (min-width: 992px) {
@@ -170,7 +183,6 @@ div.main-content {
       [dir="rtl"] & { margin-left: unset; margin-right: $sidebar-width-fixed; }
   }
 }
-
 
 aside.page-toc {
     position: fixed;
